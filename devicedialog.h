@@ -18,7 +18,7 @@ public:
 
 signals:
     void allowed(quint32 seqn, bool permanent);
-    void denied(quint32 seqn, bool permanent);
+    void blocked(quint32 seqn, bool permanent);
     void rejected(quint32 seqn, bool permanent);
 
 protected slots:
@@ -31,7 +31,7 @@ protected:
     void executeDefaultDecision();
 private slots:
     void on_allow_button_clicked();
-    void on_deny_button_clicked();
+    void on_block_button_clicked();
     void on_reject_button_clicked();
     void on_timeout_checkbox_toggled(bool checked);
     void on_permanent_checkbox_toggled(bool checked);

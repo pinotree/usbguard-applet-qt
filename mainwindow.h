@@ -22,7 +22,7 @@ signals:
     void DeviceInserted(quint32 seqn, const QString& name, bool rule_match);
     void DeviceRemoved(quint32 seqn, const QString& name);
     void DeviceAllowed(quint32 seqn, const QString& name);
-    void DeviceDenied(quint32 seqn, const QString& name);
+    void DeviceBlocked(quint32 seqn, const QString& name);
     void DeviceRejected(quint32 seqn, const QString& name);
     void Connected();
     void Disconnected();
@@ -38,13 +38,13 @@ protected slots:
     void notifyInserted(quint32 seqn, const QString &name, bool rule_matched);
     void notifyRemoved(quint32 seqn, const QString& name);
     void notifyAllowed(quint32 seqn, const QString& name);
-    void notifyDenied(quint32 seqn, const QString& name);
+    void notifyBlocked(quint32 seqn, const QString& name);
     void notifyRejected(quint32 seqn, const QString& name);
     void notifyIPCConnected();
     void notifyIPCDisconnected();
 
     void allowDevice(quint32 seqn, bool append);
-    void denyDevice(quint32 seqn, bool append);
+    void blockDevice(quint32 seqn, bool append);
     void rejectDevice(quint32 seqn, bool append);
 
     void handleIPCConnect();
@@ -59,7 +59,7 @@ protected:
     void DeviceInserted(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn);
     void DeviceRemoved(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id);
     void DeviceAllowed(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn);
-    void DeviceDenied(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn);
+    void DeviceBlocked(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn);
     void DeviceRejected(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn);
     void IPCConnected();
     void IPCDisconnected();

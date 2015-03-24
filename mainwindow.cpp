@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, SIGNAL(DeviceInserted(quint32,QString,bool)), this, SLOT(showDeviceDialog(quint32,QString,bool)));
     QObject::connect(this, SIGNAL(DeviceInserted(quint32,QString,bool)), this, SLOT(notifyInserted(quint32,QString,bool)));
     QObject::connect(this, SIGNAL(DeviceAllowed(quint32,QString)), this, SLOT(notifyAllowed(quint32,QString)));
-    QObject::connect(this, SIGNAL(DeviceDenied(quint32,QString)), this, SLOT(notifyDenied(quint32,QString)));
+    QObject::connect(this, SIGNAL(DeviceBlocked(quint32,QString)), this, SLOT(notifyBlocked(quint32,QString)));
     QObject::connect(this, SIGNAL(DeviceRejected(quint32,QString)), this, SLOT(notifyRejected(quint32,QString)));
     QObject::connect(this, SIGNAL(DeviceRemoved(quint32,QString)), this, SLOT(notifyRemoved(quint32,QString)));
     QObject::connect(this, SIGNAL(Connected()), this, SLOT(handleIPCConnect()));
@@ -87,7 +87,7 @@ void MainWindow::showDeviceDialog(quint32 seqn, const QString &name, bool rule_m
         DeviceDialog *d = new DeviceDialog(seqn, QString(name), QString());
         QObject::connect(d, SIGNAL(allowed(quint32,bool)), this, SLOT(allowDevice(quint32,bool)));
         QObject::connect(d, SIGNAL(rejected(quint32,bool)), this, SLOT(rejectDevice(quint32,bool)));
-        QObject::connect(d, SIGNAL(denied(quint32,bool)), this, SLOT(denyDevice(quint32,bool)));
+        QObject::connect(d, SIGNAL(blocked(quint32,bool)), this, SLOT(blockDevice(quint32,bool)));
         d->setModal(false);
         d->show();
     }
@@ -122,7 +122,7 @@ void MainWindow::notifyAllowed(quint32 seqn, const QString &name)
     showMessage(QString("Allowed: %1").arg(name));
 }
 
-void MainWindow::notifyDenied(quint32 seqn, const QString &name)
+void MainWindow::notifyBlocked(quint32 seqn, const QString &name)
 {
     systray->showMessage("USB Device Blocked", QString("Name: %1").arg(name), QSystemTrayIcon::Warning);
     showMessage(QString("Blocked: %1").arg(name));
@@ -200,10 +200,10 @@ void MainWindow::allowDevice(quint32 seqn, bool append)
     }
 }
 
-void MainWindow::denyDevice(quint32 seqn, bool append)
+void MainWindow::blockDevice(quint32 seqn, bool append)
 {
     try {
-        IPCClient::denyDevice(seqn, append, 0);
+        IPCClient::blockDevice(seqn, append, 0);
     }
     catch(...) {
     }
@@ -266,9 +266,9 @@ void MainWindow::DeviceAllowed(quint32 seqn, const std::string &name, const std:
     emit DeviceAllowed(seqn, QString(name.c_str()));
 }
 
-void MainWindow::DeviceDenied(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
+void MainWindow::DeviceBlocked(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
 {
-    emit DeviceDenied(seqn, QString(name.c_str()));
+    emit DeviceBlocked(seqn, QString(name.c_str()));
 }
 
 void MainWindow::DeviceRejected(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)

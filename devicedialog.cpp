@@ -19,7 +19,7 @@ DeviceDialog::DeviceDialog(quint32 seqn, const QString &name, const QString &rul
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
                                     size(),
                                     qApp->desktop()->availableGeometry()));
-    ui->deny_button->setFocus();
+    ui->block_button->setFocus();
     device_seqn = seqn;
 
 #if 1
@@ -63,16 +63,16 @@ void DeviceDialog::accept()
 void DeviceDialog::updateDialog()
 {
     if (timer.isActive()) {
-        ui->deny_button->setText(QString("Block [%1]").arg(time_left));
+        ui->block_button->setText(QString("Block [%1]").arg(time_left));
     } else {
-        ui->deny_button->setText(QString("Block"));
+        ui->block_button->setText(QString("Block"));
         ui->hint_label->setText("(Press Escape to close this window)");
     }
 }
 
 void DeviceDialog::executeDefaultDecision()
 {
-    on_deny_button_clicked();
+    on_block_button_clicked();
     return;
 }
 
@@ -87,9 +87,9 @@ void DeviceDialog::on_allow_button_clicked()
     accept();
 }
 
-void DeviceDialog::on_deny_button_clicked()
+void DeviceDialog::on_block_button_clicked()
 {
-    emit denied(device_seqn, ui->permanent_checkbox->isChecked());
+    emit blocked(device_seqn, ui->permanent_checkbox->isChecked());
     accept();
 }
 

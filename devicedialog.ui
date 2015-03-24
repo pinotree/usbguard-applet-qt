@@ -126,7 +126,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="1">
-       <widget class="QPushButton" name="deny_button">
+       <widget class="QPushButton" name="block_button">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
@@ -199,7 +199,7 @@
      <zorder>allow_button</zorder>
      <zorder>allow_button</zorder>
      <zorder>reject_button</zorder>
-     <zorder>deny_button</zorder>
+     <zorder>block_button</zorder>
      <zorder>hint_label</zorder>
     </widget>
    </item>
