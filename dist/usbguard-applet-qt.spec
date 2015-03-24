@@ -1,5 +1,5 @@
 Name:           usbguard-applet-qt
-Version:        0.1
+Version:        0.2
 Release:        1%{?dist}
 Summary:        USBGuard Qt applet
 Group:          System Environment/Libraries
@@ -18,7 +18,7 @@ USBGuard Qt applet
 
 %prep
 %setup -q -n "%{name}%{version}"
-chmod +w usr/lib64
+chmod +w ./usr/lib64 && rm -rf ./usr/
 
 %build
 %ifarch sparc64
@@ -48,5 +48,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/usbguard-applet-qt
 
 %changelog
+* Tue Mar 24 2015 Daniel Kopecek <dkopecek@redhat.com> 0.2-1
+- Update to version 0.2
+
 * Tue Mar 17 2015 Daniel Kopecek <dkopecek@redhat.com> 0.1-1
 - Initial package
