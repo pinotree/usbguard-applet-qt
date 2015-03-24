@@ -4,8 +4,8 @@ Release:        1%{?dist}
 Summary:        USBGuard Qt applet
 Group:          System Environment/Libraries
 License:        GPLv2+
-URL:            http://nonesofar/
-Source0:        %{name}%{version}.tar.gz
+URL:            http://dkopecek.github.io/usbguard
+Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}%{version}-%{release}-root-%(%{__id_u} -n)
 
 # UDev
@@ -17,8 +17,7 @@ BuildRequires: qt-devel
 USBGuard Qt applet
 
 %prep
-%setup -q -n "%{name}%{version}"
-chmod +w ./usr/lib64 && rm -rf ./usr/
+%setup -q
 
 %build
 %ifarch sparc64
@@ -32,13 +31,14 @@ export CFLAGS=$CXXFLAGS
 export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
 %endif
 
-qmake-qt4 -makefile QtApplet.pro
+mkdir _build && cd _build
+cmake ..
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
-install -p usbguard-applet-qt $RPM_BUILD_ROOT%{_bindir}/usbguard-applet-qt
+install -p _build/usbguard-applet-qt $RPM_BUILD_ROOT%{_bindir}/usbguard-applet-qt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -50,6 +50,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Tue Mar 24 2015 Daniel Kopecek <dkopecek@redhat.com> 0.2-1
 - Update to version 0.2
+- cmake based build System
 
 * Tue Mar 17 2015 Daniel Kopecek <dkopecek@redhat.com> 0.1-1
 - Initial package
