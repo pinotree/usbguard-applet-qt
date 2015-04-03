@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QTimer>
+#include <usbguard/USB.hpp>
 
 namespace Ui {
 class DeviceDialog;
@@ -13,8 +14,13 @@ class DeviceDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DeviceDialog(quint32 seqn, const QString& name, const QString& rule, QWidget *parent = 0);
+    explicit DeviceDialog(quint32 seqn, QWidget *parent = 0);
     ~DeviceDialog();
+
+    void setName(const QString& name);
+    void setSerial(const QString& serial);
+    void setDeviceID(const QString& vendor_id, const QString& product_id);
+    void setInterfaceTypes(const std::vector<usbguard::USBInterfaceType>& interfaces);
 
 signals:
     void allowed(quint32 seqn, bool permanent);
@@ -29,6 +35,7 @@ protected:
     void accept();
     void updateDialog();
     void executeDefaultDecision();
+
 private slots:
     void on_allow_button_clicked();
     void on_block_button_clicked();
@@ -40,7 +47,13 @@ private:
     Ui::DeviceDialog *ui;
     QTimer timer;
     int time_left;
+
     quint32 device_seqn;
+
+    QString _name;
+    QString _serial;
+    QString _device_id;
+    QStringList _interface_types;
 };
 
 #endif // DEVICEDIALOG_H

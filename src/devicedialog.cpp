@@ -4,31 +4,60 @@
 #include <QStyle>
 #include <QDesktopWidget>
 
-DeviceDialog::DeviceDialog(quint32 seqn, const QString &name, const QString &rule, QWidget *parent) :
+DeviceDialog::DeviceDialog(quint32 seqn, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DeviceDialog)
 {
     ui->setupUi(this);
-    ui->name_label->setText(name);
-    setWindowTitle(QString("USB Device Inserted: %1").arg(name));
+
+    setWindowTitle(QString("USB Device Inserted"));
     setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
+
+    device_seqn = seqn;
+
     time_left = 23;
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
     timer.start(1000);
-    updateDialog();
+
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
                                     size(),
                                     qApp->desktop()->availableGeometry()));
-    ui->block_button->setFocus();
-    device_seqn = seqn;
+    updateDialog();
 
+    ui->block_button->setFocus();
 #if 1
     /* Hide things which aren't working yet */
-    ui->permanent_checkbox->hide();
     ui->timeout_checkbox->hide();
     ui->timeout_combobox->hide();
     ui->timeout_lineedit->hide();
 #endif
+}
+
+void DeviceDialog::setName(const QString& name)
+{
+    ui->name_label->setText(name);
+    return;
+}
+
+void DeviceDialog::setDeviceID(const QString& vendor_id, const QString& product_id)
+{
+    ui->deviceid_label->setText(QString("%1:%2").arg(vendor_id).arg(product_id));
+    return;
+}
+
+void DeviceDialog::setSerial(const QString &serial)
+{
+    ui->serial_label->setText(serial);
+    return;
+}
+
+void DeviceDialog::setInterfaceTypes(const std::vector<usbguard::USBInterfaceType>& interfaces)
+{
+  ui->interface_list->clear();
+  for (auto const& type : interfaces) {
+      ui->interface_list->addItem(QString::fromStdString(type.typeString()));
+  }
+  return;
 }
 
 void DeviceDialog::timerUpdate()

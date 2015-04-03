@@ -21,15 +21,38 @@ MainWindow::MainWindow(QWidget *parent) :
     setupSystemTray();
     showMinimized();
 
-    QObject::connect(&_ipc_timer, SIGNAL(timeout()), this, SLOT(ipcTryConnect()));
-    QObject::connect(this, SIGNAL(DeviceInserted(quint32,QString,bool)), this, SLOT(showDeviceDialog(quint32,QString,bool)));
-    QObject::connect(this, SIGNAL(DeviceInserted(quint32,QString,bool)), this, SLOT(notifyInserted(quint32,QString,bool)));
-    QObject::connect(this, SIGNAL(DeviceAllowed(quint32,QString)), this, SLOT(notifyAllowed(quint32,QString)));
-    QObject::connect(this, SIGNAL(DeviceBlocked(quint32,QString)), this, SLOT(notifyBlocked(quint32,QString)));
-    QObject::connect(this, SIGNAL(DeviceRejected(quint32,QString)), this, SLOT(notifyRejected(quint32,QString)));
-    QObject::connect(this, SIGNAL(DeviceRemoved(quint32,QString)), this, SLOT(notifyRemoved(quint32,QString)));
-    QObject::connect(this, SIGNAL(Connected()), this, SLOT(handleIPCConnect()));
-    QObject::connect(this, SIGNAL(Disconnected()), this, SLOT(handleIPCDisconnect()));
+    qRegisterMetaType<std::map<std::string, std::string> >("std::map<std::string, std::string>");
+    qRegisterMetaType<std::vector<usbguard::USBInterfaceType> >("std::vector<usbguard::USBInterfaceType>");
+
+    QObject::connect(&_ipc_timer, SIGNAL(timeout()),
+		     this, SLOT(ipcTryConnect()));
+
+    QObject::connect(this, SIGNAL(uiDeviceInserted(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, bool)),
+		     this, SLOT(showDeviceDialog(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, bool)));
+
+    QObject::connect(this, SIGNAL(uiDevicePresent(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, usbguard::Rule::Target)),
+		     this, SLOT(notifyPresent(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, usbguard::Rule::Target)));
+
+    QObject::connect(this, SIGNAL(uiDeviceInserted(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, bool)),
+		     this, SLOT(notifyInserted(quint32, const std::map<std::string, std::string>&, const std::vector<usbguard::USBInterfaceType>&, bool)));
+
+    QObject::connect(this, SIGNAL(uiDeviceAllowed(quint32, const std::map<std::string, std::string>&)),
+		     this, SLOT(notifyAllowed(quint32, const std::map<std::string, std::string>&)));
+
+    QObject::connect(this, SIGNAL(uiDeviceBlocked(quint32, const std::map<std::string, std::string>&)),
+		     this, SLOT(notifyBlocked(quint32, const std::map<std::string, std::string>&)));
+
+    QObject::connect(this, SIGNAL(uiDeviceRejected(quint32, const std::map<std::string, std::string>&)),
+		     this, SLOT(notifyRejected(quint32, const std::map<std::string, std::string>&)));
+
+    QObject::connect(this, SIGNAL(uiDeviceRemoved(quint32, const std::map<std::string, std::string>&)),
+		     this, SLOT(notifyRemoved(quint32, const std::map<std::string, std::string>&)));
+
+    QObject::connect(this, SIGNAL(uiConnected()),
+		     this, SLOT(handleIPCConnect()));
+
+    QObject::connect(this, SIGNAL(uiDisconnected()),
+		     this, SLOT(handleIPCDisconnect()));
 
     _ipc_timer.setInterval(1000);
     _ipc_timer.start();
@@ -53,11 +76,18 @@ void MainWindow::setupSystemTray()
     auto quit_action = new QAction("Quit", systray);
     menu->addAction(quit_action);
     systray->setContextMenu(menu);
-    QObject::connect(quit_action, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+    QObject::connect(quit_action, SIGNAL(triggered()),
+		     qApp, SLOT(quit()));
+
     QObject::connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                      this, SLOT(switchVisibilityState(QSystemTrayIcon::ActivationReason)));
-    QObject::connect(&_flash_timer, SIGNAL(timeout()), this, SLOT(flashStep()));    
+
+    QObject::connect(&_flash_timer, SIGNAL(timeout()),
+		     this, SLOT(flashStep()));    
+
     systray->show();
+    return;
 }
 
 void MainWindow::switchVisibilityState(QSystemTrayIcon::ActivationReason reason)
@@ -81,16 +111,28 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showDeviceDialog(quint32 seqn, const QString &name, bool rule_match)
+void MainWindow::showDeviceDialog(quint32 seqn, const std::map<std::string, std::string>& attributes, const std::vector<usbguard::USBInterfaceType>& interfaces, bool rule_match)
 {
     if (!rule_match) {
-        DeviceDialog *d = new DeviceDialog(seqn, QString(name), QString());
-        QObject::connect(d, SIGNAL(allowed(quint32,bool)), this, SLOT(allowDevice(quint32,bool)));
-        QObject::connect(d, SIGNAL(rejected(quint32,bool)), this, SLOT(rejectDevice(quint32,bool)));
-        QObject::connect(d, SIGNAL(blocked(quint32,bool)), this, SLOT(blockDevice(quint32,bool)));
+        DeviceDialog *d = new DeviceDialog(seqn);
+
+        d->setName(QString::fromStdString(attributes.at("name")));
+    d->setSerial(QString::fromStdString(attributes.at("serial")));
+    d->setDeviceID(QString::fromStdString(attributes.at("vendor_id")),
+                   QString::fromStdString(attributes.at("product_id")));
+	d->setInterfaceTypes(interfaces);
+
+        QObject::connect(d, SIGNAL(allowed(quint32,bool)),
+			 this, SLOT(allowDevice(quint32,bool)));
+        QObject::connect(d, SIGNAL(rejected(quint32,bool)),
+			 this, SLOT(rejectDevice(quint32,bool)));
+        QObject::connect(d, SIGNAL(blocked(quint32,bool)),
+			 this, SLOT(blockDevice(quint32,bool)));
+
         d->setModal(false);
         d->show();
     }
+    return;
 }
 
 void MainWindow::showMessage(const QString& message, bool alert)
@@ -102,40 +144,51 @@ void MainWindow::showMessage(const QString& message, bool alert)
     return;
 }
 
-void MainWindow::notifyInserted(quint32 seqn,const QString &name, bool rule_matched)
+void MainWindow::notifyInserted(quint32 seqn, const std::map<std::string, std::string>& attributes, const std::vector<usbguard::USBInterfaceType>& interfaces, bool rule_matched)
 {
-    if (rule_matched) {
-        systray->showMessage("USB Device Inserted", QString("Name: %1").arg(name), QSystemTrayIcon::Information);
-    }
-    showMessage(QString("<i>Inserted</i>: %1").arg(name));
+  if (rule_matched) {
+    systray->showMessage("USB Device Inserted", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Information);
+  }
+  showMessage(QString("<i>Inserted</i>: %1").arg(QString::fromStdString(attributes.at("name"))));
+  return;
 }
 
-void MainWindow::notifyRemoved(quint32 seqn,const QString &name)
+void MainWindow::notifyPresent(quint32 seqn, const std::map<std::string, std::string>& attributes, const std::vector<usbguard::USBInterfaceType>& interfaces, usbguard::Rule::Target target)
 {
-    systray->showMessage("USB Device Removed", QString("Name: %1").arg(name), QSystemTrayIcon::Information);
-    showMessage(QString("<i>Removed</i>: %1").arg(name));
+  systray->showMessage("USB Device Present", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Information);
+  showMessage(QString("<i>Present</i>: %1").arg(QString::fromStdString(attributes.at("name"))));
+  return;
 }
 
-void MainWindow::notifyAllowed(quint32 seqn, const QString &name)
+void MainWindow::notifyRemoved(quint32 seqn, const std::map<std::string, std::string>& attributes)
 {
-    systray->showMessage("USB Device Allowed", QString("Name: %1").arg(name), QSystemTrayIcon::Information);
-    showMessage(QString("Allowed: %1").arg(name));
+  systray->showMessage("USB Device Removed", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Information);
+  showMessage(QString("<i>Removed</i>: %1").arg(QString::fromStdString(attributes.at("name"))));
+  return;
 }
 
-void MainWindow::notifyBlocked(quint32 seqn, const QString &name)
+void MainWindow::notifyAllowed(quint32 seqn, const std::map<std::string, std::string>& attributes)
 {
-    systray->showMessage("USB Device Blocked", QString("Name: %1").arg(name), QSystemTrayIcon::Warning);
-    showMessage(QString("Blocked: %1").arg(name));
-
+  systray->showMessage("USB Device Allowed", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Information);
+  showMessage(QString("Allowed: %1").arg(QString::fromStdString(attributes.at("name"))));
+  return;
 }
 
-void MainWindow::notifyRejected(quint32 seqn, const QString &name)
+void MainWindow::notifyBlocked(quint32 seqn, const std::map<std::string, std::string>& attributes)
 {
-    systray->showMessage("USB Device Rejected", QString("Name: %1").arg(name), QSystemTrayIcon::Critical);
-    showMessage(QString("Rejected: %1").arg(name), true);
-    if (this->windowState() & Qt::WindowMinimized) {
-        startFlashing();
-    }
+  systray->showMessage("USB Device Blocked", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Warning);
+  showMessage(QString("Blocked: %1").arg(QString::fromStdString(attributes.at("name"))));
+  return;
+}
+
+void MainWindow::notifyRejected(quint32 seqn, const std::map<std::string, std::string>& attributes)
+{
+  systray->showMessage("USB Device Rejected", QString("Name: %1").arg(QString::fromStdString(attributes.at("name"))), QSystemTrayIcon::Critical);
+  showMessage(QString("Rejected: %1").arg(QString::fromStdString(attributes.at("name"))), true);
+  if (this->windowState() & Qt::WindowMinimized) {
+    startFlashing();
+  }
+  return;
 }
 
 void MainWindow::notifyIPCConnected()
@@ -251,37 +304,42 @@ void MainWindow::changeEvent(QEvent* e)
     QMainWindow::changeEvent(e);
 }
 
-void MainWindow::DeviceInserted(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
+void MainWindow::DeviceInserted(quint32 seqn, const std::map<std::string, std::string>& attributes, const std::vector<usbguard::USBInterfaceType>& interfaces, bool rule_match, quint32 rule_seqn)
 {
-    emit DeviceInserted(seqn, QString(name.c_str()), rule_match);
+  emit uiDeviceInserted(seqn, attributes, interfaces, rule_match);
 }
 
-void MainWindow::DeviceRemoved(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id)
+void MainWindow::DevicePresent(quint32 seqn, const std::map<std::string, std::string>& attributes, const std::vector<usbguard::USBInterfaceType>& interfaces, usbguard::Rule::Target target)
 {
-    emit DeviceRemoved(seqn, QString(name.c_str()));
+  emit uiDevicePresent(seqn, attributes, interfaces, target);
 }
 
-void MainWindow::DeviceAllowed(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
+void MainWindow::DeviceRemoved(quint32 seqn, const std::map<std::string, std::string>& attributes)
 {
-    emit DeviceAllowed(seqn, QString(name.c_str()));
+  emit uiDeviceRemoved(seqn, attributes);
 }
 
-void MainWindow::DeviceBlocked(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
+void MainWindow::DeviceAllowed(quint32 seqn, const std::map<std::string, std::string>& attributes, bool rule_match, quint32 rule_seqn)
 {
-    emit DeviceBlocked(seqn, QString(name.c_str()));
+  emit uiDeviceAllowed(seqn, attributes);
 }
 
-void MainWindow::DeviceRejected(quint32 seqn, const std::string &name, const std::string &usb_class, const std::string &vendor_id, const std::string &product_id, bool rule_match, quint32 rule_seqn)
+void MainWindow::DeviceBlocked(quint32 seqn, const std::map<std::string, std::string>& attributes, bool rule_match, quint32 rule_seqn)
 {
-    emit DeviceRejected(seqn, QString(name.c_str()));
+  emit uiDeviceBlocked(seqn, attributes);
+}
+
+void MainWindow::DeviceRejected(quint32 seqn, const std::map<std::string, std::string>& attributes, bool rule_match, quint32 rule_seqn)
+{
+  emit uiDeviceRejected(seqn, attributes);
 }
 
 void MainWindow::IPCConnected()
 {
-    emit Connected();
+  emit uiConnected();
 }
 
 void MainWindow::IPCDisconnected()
 {
-    emit Disconnected();
+  emit uiDisconnected();
 }
