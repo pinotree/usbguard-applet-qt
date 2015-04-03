@@ -2,19 +2,18 @@ Name:           usbguard-applet-qt
 Version:        0.2
 Release:        1%{?dist}
 Summary:        USBGuard Qt applet
-Group:          System Environment/Libraries
+Group:          Applications/System
 License:        GPLv2+
 URL:            http://dkopecek.github.io/usbguard
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}%{version}-%{release}-root-%(%{__id_u} -n)
 
-# UDev
 Requires: usbguard
 BuildRequires: usbguard-devel
 BuildRequires: qt-devel
 
 %description
-USBGuard Qt applet
+USBGuard Qt applet for interaction with the USBGuard daemon.
 
 %prep
 %setup -q
@@ -48,9 +47,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/usbguard-applet-qt
 
 %changelog
-* Tue Mar 24 2015 Daniel Kopecek <dkopecek@redhat.com> 0.2-1
+* Fri Apr 03 2015 Daniel Kopecek <dkopecek@redhat.com> 0.2-1
 - Update to version 0.2
 - cmake based build System
+- Updated description
+- Corrected package group
 
 * Tue Mar 17 2015 Daniel Kopecek <dkopecek@redhat.com> 0.1-1
 - Initial package
