@@ -11,6 +11,7 @@ BuildRoot:      %{_tmppath}/%{name}%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: usbguard
 BuildRequires: usbguard-devel
 BuildRequires: qt-devel
+BuildRequires: cmake
 
 %description
 USBGuard Qt applet for interaction with the USBGuard daemon.
