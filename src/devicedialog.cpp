@@ -28,7 +28,7 @@ DeviceDialog::DeviceDialog(quint32 seqn, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowTitle(QString("USB Device Inserted"));
+    setWindowTitle(QString(tr("USB Device Inserted")));
     setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
 
     device_seqn = seqn;
@@ -110,10 +110,10 @@ void DeviceDialog::accept()
 void DeviceDialog::updateDialog()
 {
     if (timer.isActive()) {
-        ui->block_button->setText(QString("Block [%1]").arg(time_left));
+      ui->block_button->setText(QString(tr("Block [%1]")).arg(time_left));
     } else {
-        ui->block_button->setText(QString("Block"));
-        ui->hint_label->setText("(Press Escape to close this window)");
+      ui->block_button->setText(QString(tr("Block")));
+      ui->hint_label->setText(tr("(Press Escape to close this window)"));
     }
 }
 
