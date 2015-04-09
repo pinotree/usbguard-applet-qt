@@ -42,15 +42,15 @@ add_custom_command(
 )
 
 install(TARGETS "usbguard-applet-qt"
-  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/usbguard-applet-qt.1.gz
-  DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES "dist/usbguard-applet-qt.desktop"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
+  DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/usbguard-applet-qt.1.gz"
+  DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/dist/usbguard-applet-qt.desktop"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
 
 set(CPACK_GENERATOR "TGZ")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "2")
+set(CPACK_PACKAGE_VERSION_MINOR "3")
 set(CPACK_PACKAGE_DESCRIPTION "Qt applet for interacting with the USBGuard daemon")
 set(CPACK_PACKAGE_CONTACT "Daniel Kopecek dkopecek@redhat.com")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
