@@ -14,8 +14,10 @@
    height="600"
    id="svg3152"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
-   sodipodi:docname="usbguard-icon.svg">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="icon-warning.svg">
+  <title
+     id="title3355">USBGuard warning icon</title>
   <defs
      id="defs3154">
     <linearGradient
@@ -43,7 +45,7 @@
   </defs>
   <sodipodi:namedview
      id="base"
-     pagecolor="#ff0000"
+     pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
      inkscape:pageopacity="0"
@@ -60,7 +62,7 @@
      inkscape:window-width="1920"
      inkscape:window-height="1025"
      inkscape:window-x="-2"
-     inkscape:window-y="-3"
+     inkscape:window-y="1077"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata3157">
@@ -70,8 +72,30 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title>USBGuard warning icon</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Daniel Kopecek</dc:title>
+          </cc:Agent>
+        </dc:creator>
       </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
     </rdf:RDF>
   </metadata>
   <g
