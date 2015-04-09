@@ -1,12 +1,11 @@
 Name:           usbguard-applet-qt
-Version:        0.2
+Version:        0.3
 Release:        1%{?dist}
 Summary:        USBGuard Qt applet
 Group:          Applications/System
 License:        GPLv2+
-URL:            http://dkopecek.github.io/usbguard
-Source0:        %{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}%{version}-%{release}-root-%(%{__id_u} -n)
+URL:            https://dkopecek.github.io/usbguard
+Source0:        https://dkpoecek.github.io/usbguard/dist/%{name}-%{version}.tar.gz
 
 Requires: usbguard
 BuildRequires: usbguard-devel
@@ -20,34 +19,27 @@ USBGuard Qt applet for interaction with the USBGuard daemon.
 %setup -q
 
 %build
-%ifarch sparc64
-#sparc64 need big PIE
-export CXXFLAGS="$RPM_OPT_FLAGS -fPIE"
-export CFLAGS=$CXXFLAGS
-export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
-%else
-export CXXFLAGS="$RPM_OPT_FLAGS -fpie"
-export CFLAGS=$CXXFLAGS
-export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
-%endif
-
-mkdir _build && cd _build
-cmake ..
+%cmake .
 make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-install -p _build/usbguard-applet-qt $RPM_BUILD_ROOT%{_bindir}/usbguard-applet-qt
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=%{buildroot}
 
 %files
 %defattr(-,root,root,-)
+%license LICENSE
 %{_bindir}/usbguard-applet-qt
+%{_mandir}/man1/usbguard-applet-qt.1.gz
+%{_datadir}/applications/usbguard-applet-qt.desktop
 
 %changelog
+* Thu Apr 09 2015 Daniel Kopecek <dkopecek@redhat.com> 0.3-1
+- Update to version 0.3
+- removed the explicit usage of BuildRoot tag and RPM_BUILD_ROOT variable
+- ship LICENSE in the binary rpm
+- install a desktop file
+- install a manual page
+
 * Fri Apr 03 2015 Daniel Kopecek <dkopecek@redhat.com> 0.2-1
 - Update to version 0.2
 - cmake based build System
