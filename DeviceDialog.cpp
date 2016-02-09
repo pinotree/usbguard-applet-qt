@@ -16,8 +16,8 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include "devicedialog.h"
-#include "ui_devicedialog.h"
+#include "DeviceDialog.h"
+#include "DeviceDialog.ui.h"
 
 #include <QStyle>
 #include <QDesktopWidget>

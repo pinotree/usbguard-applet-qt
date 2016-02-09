@@ -16,13 +16,13 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef USBGUARD_MAINWINDOW_H
+#define USBGUARD_MAINWINDOW_H
 
 #include <QSystemTrayIcon>
 #include <QMainWindow>
 #include <QTimer>
-#include <usbguard/IPCClient.hpp>
+#include <IPCClient.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -97,4 +97,4 @@ private:
     QTimer _ipc_timer;
 };
 
-#endif // MAINWINDOW_H
+#endif // USBGUARD_MAINWINDOW_H

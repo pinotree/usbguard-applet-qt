@@ -16,9 +16,9 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "devicedialog.h"
+#include "MainWindow.h"
+#include "MainWindow.ui.h"
+#include "DeviceDialog.h"
 #include <QString>
 #include <QSystemTrayIcon>
 #include <QTimer>

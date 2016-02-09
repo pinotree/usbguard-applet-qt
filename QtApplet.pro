@@ -16,18 +16,17 @@ QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES +=\
     main.cpp\
-    mainwindow.cpp \
-    devicedialog.cpp
+    MainWindow.cpp \
+    DeviceDialog.cpp
 
 HEADERS +=\
-    mainwindow.h \
-    devicedialog.h
+    MainWindow.h \
+    DeviceDialog.h
 
-FORMS += mainwindow.ui \
-    devicedialog.ui
+FORMS += MainWindow.ui \
+    DeviceDialog.ui
 
 unix: CONFIG += link_pkgconfig
-unix: PKGCONFIG += libusbguard
 
 RESOURCES += \
     icon.qrc

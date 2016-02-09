@@ -16,12 +16,12 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#ifndef DEVICEDIALOG_H
-#define DEVICEDIALOG_H
+#ifndef USBGUARD_DEVICEDIALOG_H
+#define USBGUARD_DEVICEDIALOG_H
 
 #include <QDialog>
 #include <QTimer>
-#include <usbguard/USB.hpp>
+#include <USB.hpp>
 
 namespace Ui {
 class DeviceDialog;
@@ -74,4 +74,4 @@ private:
     QStringList _interface_types;
 };
 
-#endif // DEVICEDIALOG_H
+#endif // USBGUARD_DEVICEDIALOG_H
