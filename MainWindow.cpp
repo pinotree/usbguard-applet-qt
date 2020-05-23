@@ -22,7 +22,7 @@
 #include "MainWindow.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
-#include "MainWindow.ui.h"
+#include <ui_MainWindow.h>
 #include "DeviceDialog.h"
 
 #include "usbguard/Logger.hpp"

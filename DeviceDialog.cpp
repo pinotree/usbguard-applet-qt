@@ -21,7 +21,7 @@
 #endif
 
 #include "DeviceDialog.h"
-#include "DeviceDialog.ui.h"
+#include <ui_DeviceDialog.h>
 
 #include "usbguard/Logger.hpp"
 
