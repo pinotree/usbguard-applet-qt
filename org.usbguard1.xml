@@ -72,6 +72,7 @@
     <method name="listRules">
       <arg name="label" direction="in" type="s"/>
       <arg name="ruleset" direction="out" type="a(us)"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="DBusRules"/>
     </method>
 
     <!--
@@ -136,6 +137,7 @@
     <method name="listDevices">
       <arg name="query" direction="in" type="s"/>
       <arg name="devices" direction="out" type="a(us)"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="DBusRules"/>
     </method>
 
     <!--
@@ -199,6 +201,7 @@
       <arg name="target" direction="out" type="u"/>
       <arg name="device_rule" direction="out" type="s"/>
       <arg name="attributes" direction="out" type="a{ss}"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out4" value="DBusAttributes"/>
     </signal>
 
     <!--
@@ -233,6 +236,7 @@
       <arg name="device_rule" direction="out" type="s"/>
       <arg name="rule_id" direction="out" type="u"/>
       <arg name="attributes" direction="out" type="a{ss}"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out5" value="DBusAttributes"/>
     </signal>
   </interface>
 </node>
