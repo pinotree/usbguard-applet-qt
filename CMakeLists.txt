@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(usbguard-applet-qt)
 
-find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(USBGUARD REQUIRED libusbguard)
 
@@ -32,6 +32,11 @@ set(applet_FORMS
 set(applet_RESOURCES
   resources/icon.qrc
 )
+set_source_files_properties(org.usbguard1.xml PROPERTIES INCLUDE DBusTypes.h)
+qt5_add_dbus_interface(applet_SOURCES
+  org.usbguard1.xml
+  OrgUsbguardInterface
+)
 
 add_executable(usbguard-applet-qt
   ${applet_SOURCES}
@@ -43,6 +48,7 @@ target_link_libraries(usbguard-applet-qt
   Qt5::Core
   Qt5::Gui
   Qt5::Widgets
+  Qt5::DBus
   ${USBGUARD_LIBRARIES}
 )
 
