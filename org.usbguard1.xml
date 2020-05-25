@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE node PUBLIC
+  "-//freedesktop//DTD D-Bus Object Introspection 1.0//EN"
+  "https://specifications.freedesktop.org/dbus/1.0/introspect.dtd">
+<node>
+  <!--
+    org.usbguard1
+    -->
+  <interface name="org.usbguard1">
+    <!--
+      getParameter:
+       @name:
+       @value:
+      -->
+    <method name="getParameter">
+      <arg name="name" direction="in" type="s"/>
+      <arg name="value" direction="out" type="s"/>
+    </method>
+    <!--
+      setParameter:
+       @name:
+       @value:
+       @previous_value:
+      -->
+    <method name="setParameter">
+      <arg name="name" direction="in" type="s"/>
+      <arg name="value" direction="in" type="s"/>
+      <arg name="previous_value" direction="out" type="s"/>
+    </method>
+
+    <!--
+      PropertyParameterChanged:
+       @name: Policy name
+       @value_old: Previous policy value.
+       @value_new: Current policy value.
+
+        Notify about a change of a property parameter.
+
+      -->
+    <signal name="PropertyParameterChanged">
+      <arg name="name" direction="out" type="s"/>
+      <arg name="value_old" direction="out" type="s"/>
+      <arg name="value_new" direction="out" type="s"/>
+    </signal>
+
+    <!--
+      ExceptionMessage:
+      @context: Description or identifier of the exception context.
+      @object: Description or identifier of the object which caused the exception.
+      @reason: Reason explaining why the exception was generated.
+      -->
+    <signal name="ExceptionMessage">
+      <arg name="context" direction="out" type="s"/>
+      <arg name="object" direction="out" type="s"/>
+      <arg name="reason" direction="out" type="s"/>
+    </signal>
+  </interface>
+  <!--
+   org.usbguard.Policy1:
+
+   The Policy interface allows to modify the USBGuard authorization policy.
+  -->
+  <interface name="org.usbguard.Policy1">
+    <!--
+      listRules:
+       @label: A label for matching rules.
+       @ruleset: An array of (rule_id, rule) tuples.
+
+      List the current rule set (policy) used by the USBGuard daemon. The
+      rules are returned in the same order as they are evaluated.
+     -->
+    <method name="listRules">
+      <arg name="label" direction="in" type="s"/>
+      <arg name="ruleset" direction="out" type="a(us)"/>
+    </method>
+
+    <!--
+      appendRule:
+       @rule: The rule that should be appended to the policy.
+       @parent_id: Rule id of the parent rule.
+       @temporary: A boolean to avoid adding this rule to the policy file.
+       @id: The rule id assigned to the succesfully appended rule.
+
+      Append a new rule to the current policy. Using the parent_id
+      parameter, the rule can be inserted anywhere in the policy,
+      not only at the end. 4294967293 (UINT32_MAX-2) is the last possible
+      ID and thus, when using this as parent id, the rule is effectively
+      appended to the list of rules. When the rule is successfully appended,
+      the id assigned to the new rule is returned.
+     -->
+    <method name="appendRule">
+      <arg name="rule" direction="in" type="s"/>
+      <arg name="parent_id" direction="in" type="u"/>
+      <arg name="temporary" direction="in" type="b"/>
+      <arg name="id" direction="out" type="u"/>
+    </method>
+
+    <!--
+      removeRule:
+       @id: The rule id of the rule to be removed.
+
+      Remove a rule from the current policy.
+     -->
+    <method name="removeRule">
+      <arg name="id" direction="in" type="u"/>
+    </method>
+  </interface>
+  <!--
+    org.usbguard.Devices1:
+
+    The org.usbguard.Devices interface provides access to USB
+    devices via the USBGuard daemon. It can be used to modify
+    the runtime authorization state of devices and to listen
+    for device events (insertion, removal, (de)authorization,
+    ...)
+   -->
+  <interface name="org.usbguard.Devices1">
+    <!--
+      listDevices:
+       @query: A query, in the rule language syntax, for matching devices.
+       @devices: An array of (device_id, device_rule) tuples that match the query.
+
+      List devices that match the specified query. The query uses the rule
+      language syntax and the devices are returned as device specific rules.
+      The target in each rule represents the current authorization state of
+      the device. Order of the returned devices is not defined and should not
+      be relied upon.
+
+      Example queries:
+       - 'match': Matches any device.
+       - 'allow': Matches only authorized devices.
+       - 'block': Matches only unauthorized devices.
+       - 'match with-interface one-of { 03:00:01 03:01:01 }': Matches any device with a HID/Keyboard interface.
+
+      -->
+    <method name="listDevices">
+      <arg name="query" direction="in" type="s"/>
+      <arg name="devices" direction="out" type="a(us)"/>
+    </method>
+
+    <!--
+      applyDevicePolicy:
+       @id: Device id of the device to authorize.
+       @target: Device authorization target in numerical form.
+                0 = Allow. 1 = Block. 2 = Reject.
+       @permanent: A boolean flag specifying whether an allow rule should be appended to the policy.
+       @rule_id: If permanent was set to true, the method will return an ID of the rule that was
+                 modified or created because of this request.
+
+      Apply an authorization target to a device.
+
+      If the permanent flag is set to True, a rule will be appended to the policy or an exiting device
+      rule will be modified in order to permanently store the authorization decision.
+
+      Sucessfull exection of this method will cause the DevicePolicyChanged signal to be broadcasted if
+      the device authorization target was different than the applied target.
+      -->
+    <method name="applyDevicePolicy">
+      <arg name="id" direction="in" type="u"/>
+      <arg name="target" direction="in" type="u"/>
+      <arg name="permanent" direction="in" type="b"/>
+      <arg name="rule_id" direction="out" type="u"/>
+    </method>
+
+    <!--
+      DevicePresenceChanged:
+       @id: Device id of the device.
+       @event: Type of the presence change event in numerical form.
+               0 = Present, 1 = Insert, 2 = Update, 3 = Remove.
+       @target: The current authorization target of the device in numerical form.
+       @device_rule: Device specific rule.
+       @attributes: A dictionary of device attributes and their values.
+ 
+      Notify that a USB device was already present when USBGuard was started. Note
+      that currently this signal is of little use to 3rd-party application developers
+      as the signal won't reach any clients on the bus because the bus connections
+      are handled after the devices are processed. However, the internal processing
+      routines may change in the future so this signal is provided and documented
+      for completeness.
+
+      The device attribute dictionary contains the following attributes:
+        - id (the USB device ID in the form VID:PID)
+        - name
+        - serial
+        - via-port
+        - hash
+        - parent-hash
+        - with-interface
+        - with-connect-type (either "hardwired", "hotplug", or the empty string for unknown)
+
+      The USB interface types are represented as strings of the form AA:BB:CC, where AA,
+      BB, and CC are hexadecimal numbers representing the class, subclass and protocol
+      of the interface  as defined by the USB standard.
+
+      -->
+    <signal name="DevicePresenceChanged">
+      <arg name="id" direction="out" type="u"/>
+      <arg name="event" direction="out" type="u"/>
+      <arg name="target" direction="out" type="u"/>
+      <arg name="device_rule" direction="out" type="s"/>
+      <arg name="attributes" direction="out" type="a{ss}"/>
+    </signal>
+
+    <!--
+      DevicePolicyChanged:
+       @id: Device id of the device
+       @target_old: Previous authorization target in numerical form.
+       @target_new: Current authorization target in numerical form.
+       @device_rule: Device specific rule.
+       @rule_id: A rule id of the matched rule. Otherwise a reserved rule id value is used.
+                 Reserved values are:
+                     4294967294 (UINT32_MAX - 1) for an implicit rule, e.g. 
+                     ImplicitPolicyTarget or InsertedDevicePolicy.
+       @attributes: A dictionary of device attributes and their values.
+
+      Notify about a change of a USB device authorization target.
+
+      The device attribute dictionary contains the following attributes:
+        - id (the USB device ID in the form VID:PID)
+        - name
+        - serial
+        - via-port
+        - hash
+        - parent-hash
+        - with-interface
+        - with-connect-type (either "hardwired", "hotplug", or the empty string for unknown)
+
+     -->
+    <signal name="DevicePolicyChanged">
+      <arg name="id" direction="out" type="u"/>
+      <arg name="target_old" direction="out" type="u"/>
+      <arg name="target_new" direction="out" type="u"/>
+      <arg name="device_rule" direction="out" type="s"/>
+      <arg name="rule_id" direction="out" type="u"/>
+      <arg name="attributes" direction="out" type="a{ss}"/>
+    </signal>
+  </interface>
+</node>
+
