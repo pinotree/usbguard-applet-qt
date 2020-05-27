@@ -46,7 +46,7 @@ public:
 protected slots:
   void switchVisibilityState(QSystemTrayIcon::ActivationReason reason);
   void flashStep();
-  void ipcTryConnect();
+  void dbusTryConnect();
 
   void showDeviceDialog(quint32 id, const usbguard::Rule& device_rule);
   void showMessage(const QString& message, bool alert = false, bool statusbar = false);
@@ -63,8 +63,8 @@ protected slots:
     const QString& device_rule,
     uint rule_id);
 
-  void notifyIPCConnected();
-  void notifyIPCDisconnected();
+  void notifyDBusConnected();
+  void notifyDBusDisconnected();
   void notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event, const usbguard::Rule& device_rule);
   void notifyDevicePolicyChanged(const usbguard::Rule& device_rule, quint32 rule_id);
   void notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const usbguard::Rule& device_rule, bool show_notification);
@@ -73,8 +73,8 @@ protected slots:
   void blockDevice(quint32 id, bool permanent);
   void rejectDevice(quint32 id, bool permanent);
 
-  void handleIPCConnect();
-  void handleIPCDisconnect();
+  void handleDBusConnect();
+  void handleDBusDisconnect();
 
   void handleDeviceInsert(quint32 id, const usbguard::Rule& device_rule);
   void handleDeviceRemove(quint32 id, const usbguard::Rule& device_rule);

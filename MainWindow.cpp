@@ -83,19 +83,19 @@ MainWindow::MainWindow(QWidget* parent) :
   QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)),
     this, SLOT(handleDevicePolicyChange(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)));
   QObject::connect(&_bridge, SIGNAL(serviceAvailable()),
-    this, SLOT(handleIPCConnect()));
+    this, SLOT(handleDBusConnect()));
   QObject::connect(&_bridge, SIGNAL(serviceUnavailable()),
-    this, SLOT(handleIPCDisconnect()));
+    this, SLOT(handleDBusDisconnect()));
   /*
    * loadSettings has to be called before setupSettingsWatcher! Otherwise it
    * will trigger the slots connected by the setupSettingsWatcher method.
    */
   loadSettings();
   setupSettingsWatcher();
-  ui->statusBar->showMessage(tr("Inactive. No IPC connection."));
+  ui->statusBar->showMessage(tr("Inactive. No D-Bus connection."));
   new QShortcut(QKeySequence(Qt::Key_Escape, Qt::Key_Escape), this, SLOT(showMinimized()));
 
-  QTimer::singleShot(1000, this, SLOT(ipcTryConnect()));
+  QTimer::singleShot(1000, this, SLOT(dbusTryConnect()));
 }
 
 void MainWindow::setupSystemTray()
@@ -363,22 +363,22 @@ void MainWindow::showNotification(QSystemTrayIcon::MessageIcon icon, const QStri
   systray->showMessage(title, message, icon);
 }
 
-void MainWindow::notifyIPCConnected()
+void MainWindow::notifyDBusConnected()
 {
-  const QString title = tr("IPC Connection Established");
+  const QString title = tr("D-Bus Connection Established");
 
-  if (ui->notify_ipc->isChecked()) {
+  if (ui->notify_dbus->isChecked()) {
     showNotification(QSystemTrayIcon::Information, title, "");
   }
 
   showMessage(title, /*alert=*/false, /*statusbar=*/true);
 }
 
-void MainWindow::notifyIPCDisconnected()
+void MainWindow::notifyDBusDisconnected()
 {
-  const QString title = tr("IPC Connection Lost");
+  const QString title = tr("D-Bus Connection Lost");
 
-  if (ui->notify_ipc->isChecked()) {
+  if (ui->notify_dbus->isChecked()) {
     showNotification(QSystemTrayIcon::Warning, title, "");
   }
 
@@ -427,7 +427,7 @@ void MainWindow::flashStep()
   }
 }
 
-void MainWindow::ipcTryConnect()
+void MainWindow::dbusTryConnect()
 {
   USBGUARD_LOG(Trace);
 
@@ -449,7 +449,7 @@ void MainWindow::allowDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("IPC call failed: %1: %2")
+    showMessage(QString("D-Bus call failed: %1: %2")
       .arg("allowDevice")
       .arg(reply.error().message()),
       /*alert=*/true);
@@ -462,7 +462,7 @@ void MainWindow::blockDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("IPC call failed: %1: %2")
+    showMessage(QString("D-Bus call failed: %1: %2")
       .arg("blockDevice")
       .arg(reply.error().message()),
       /*alert=*/true);
@@ -475,26 +475,26 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("IPC call failed: %1: %2")
+    showMessage(QString("D-Bus call failed: %1: %2")
       .arg("rejectDevice")
       .arg(reply.error().message()),
       /*alert=*/true);
   }
 }
 
-void MainWindow::handleIPCConnect()
+void MainWindow::handleDBusConnect()
 {
   USBGUARD_LOG(Trace);
-  notifyIPCConnected();
+  notifyDBusConnected();
   systray->setIcon(QIcon(":/usbguard-icon.svg"));
   ui->device_view->setDisabled(false);
   loadDeviceList();
 }
 
-void MainWindow::handleIPCDisconnect()
+void MainWindow::handleDBusDisconnect()
 {
   USBGUARD_LOG(Trace);
-  notifyIPCDisconnected();
+  notifyDBusDisconnected();
   systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
   clearDeviceList();
   ui->device_view->setDisabled(true);
@@ -526,7 +526,8 @@ void MainWindow::loadSettings()
   ui->notify_blocked->setChecked(_settings.value("Blocked", true).toBool());
   ui->notify_rejected->setChecked(_settings.value("Rejected", true).toBool());
   ui->notify_present->setChecked(_settings.value("Present", false).toBool());
-  ui->notify_ipc->setChecked(_settings.value("IPCStatus", false).toBool());
+  // Left as IPCStatus for compatibility.
+  ui->notify_dbus->setChecked(_settings.value("IPCStatus", false).toBool());
   _settings.endGroup();
   _settings.beginGroup("DeviceDialog");
   const int default_decision_index = _settings.value("DefaultDecision", 1).toInt();
@@ -560,7 +561,8 @@ void MainWindow::saveSettings()
   _settings.setValue("Blocked", ui->notify_blocked->isChecked());
   _settings.setValue("Rejected", ui->notify_rejected->isChecked());
   _settings.setValue("Present", ui->notify_present->isChecked());
-  _settings.setValue("IPCStatus", ui->notify_ipc->isChecked());
+  // Left as IPCStatus for compatibility.
+  _settings.setValue("IPCStatus", ui->notify_dbus->isChecked());
   _settings.endGroup();
   _settings.beginGroup("DeviceDialog");
   _settings.setValue("DefaultDecision", ui->default_decision_combobox->currentIndex());
@@ -580,7 +582,7 @@ void MainWindow::loadDeviceList()
 
   QDBusPendingReply<DBusRules> reply = _bridge.listDevices("match");
   if (!reply.isValid()) {
-    showMessage(QString("IPC call failed: %1: %2")
+    showMessage(QString("D-Bus call failed: %1: %2")
       .arg("listDevices")
       .arg(reply.error().message()),
       /*alert=*/true);
