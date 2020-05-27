@@ -18,6 +18,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(${USBGUARD_INCLUDE_DIRS})
 
 set(applet_SOURCES
+  DBusBridge.cpp
   DeviceDialog.cpp
   DeviceModel.cpp
   MainWindow.cpp

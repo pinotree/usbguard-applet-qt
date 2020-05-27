@@ -24,6 +24,7 @@
 #pragma GCC diagnostic ignored "-Wswitch-default"
 #include <ui_MainWindow.h>
 #include "DeviceDialog.h"
+#include "DBusBridge.h"
 
 #include "usbguard/Logger.hpp"
 
@@ -49,7 +50,8 @@ MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   _settings("USBGuard", "usbguard-applet-qt"),
-  _device_model(this)
+  _device_model(this),
+  _bridge(this)
 {
   /*
    * Seed the pseudo-random generator. We use it for
@@ -76,19 +78,13 @@ MainWindow::MainWindow(QWidget* parent) :
   setupSystemTray();
   qRegisterMetaType<usbguard::DeviceManager::EventType>("usbguard::DeviceManager::EventType");
   qRegisterMetaType<usbguard::Rule::Target>("usbguard::Rule::Target");
-  qRegisterMetaType<std::string>("std::string");
-  QObject::connect(&_ipc_timer, SIGNAL(timeout()),
-    this, SLOT(ipcTryConnect()));
-  QObject::connect(this, SIGNAL(uiDevicePresenceChanged(quint32, usbguard::DeviceManager::EventType, usbguard::Rule::Target,
-        const std::string&)),
-    this, SLOT(handleDevicePresenceChange(quint32, usbguard::DeviceManager::EventType, usbguard::Rule::Target,
-        const std::string&)));
-  QObject::connect(this, SIGNAL(uiDevicePolicyChanged(quint32, usbguard::Rule::Target, usbguard::Rule::Target, const std::string&,
-        quint32)),
-    this, SLOT(handleDevicePolicyChange(quint32, usbguard::Rule::Target, usbguard::Rule::Target, const std::string&, quint32)));
-  QObject::connect(this, SIGNAL(uiConnected()),
+  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, usbguard::DeviceManager::EventType, usbguard::Rule::Target, const QString &)),
+    this, SLOT(handleDevicePresenceChange(uint, usbguard::DeviceManager::EventType, usbguard::Rule::Target, const QString&)));
+  QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)),
+    this, SLOT(handleDevicePolicyChange(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)));
+  QObject::connect(&_bridge, SIGNAL(serviceAvailable()),
     this, SLOT(handleIPCConnect()));
-  QObject::connect(this, SIGNAL(uiDisconnected()),
+  QObject::connect(&_bridge, SIGNAL(serviceUnavailable()),
     this, SLOT(handleIPCDisconnect()));
   /*
    * loadSettings has to be called before setupSettingsWatcher! Otherwise it
@@ -96,10 +92,10 @@ MainWindow::MainWindow(QWidget* parent) :
    */
   loadSettings();
   setupSettingsWatcher();
-  _ipc_timer.setInterval(1000);
-  _ipc_timer.start();
   ui->statusBar->showMessage(tr("Inactive. No IPC connection."));
   new QShortcut(QKeySequence(Qt::Key_Escape, Qt::Key_Escape), this, SLOT(showMinimized()));
+
+  QTimer::singleShot(1000, this, SLOT(ipcTryConnect()));
 }
 
 void MainWindow::setupSystemTray()
@@ -155,7 +151,6 @@ void MainWindow::switchVisibilityState(QSystemTrayIcon::ActivationReason reason)
 
 MainWindow::~MainWindow()
 {
-  IPCClient::disconnect();
   delete ui;
 }
 
@@ -218,13 +213,13 @@ void MainWindow::showMessage(const QString& message, bool alert, bool statusbar)
   }
 }
 
-void MainWindow::handleDevicePresenceChange(quint32 id,
+void MainWindow::handleDevicePresenceChange(uint id,
   usbguard::DeviceManager::EventType event,
   usbguard::Rule::Target target,
-  const std::string& device_rule_string)
+  const QString& device_rule_string)
 {
   (void)target;
-  auto device_rule = usbguard::Rule::fromString(device_rule_string);
+  auto device_rule = usbguard::Rule::fromString(device_rule_string.toStdString());
 
   switch (event) {
   case usbguard::DeviceManager::EventType::Insert:
@@ -245,14 +240,14 @@ void MainWindow::handleDevicePresenceChange(quint32 id,
   notifyDevicePresenceChanged(event, device_rule);
 }
 
-void MainWindow::handleDevicePolicyChange(quint32 id,
+void MainWindow::handleDevicePolicyChange(uint id,
   usbguard::Rule::Target target_old,
   usbguard::Rule::Target target_new,
-  const std::string& device_rule_string,
-  quint32 rule_id)
+  const QString& device_rule_string,
+  uint rule_id)
 {
   (void)target_old;
-  auto device_rule = usbguard::Rule::fromString(device_rule_string);
+  auto device_rule = usbguard::Rule::fromString(device_rule_string.toStdString());
   _device_model.updateDeviceTarget(id, target_new);
   ui->device_view->expandAll();
   notifyDevicePolicyChanged(device_rule, rule_id);
@@ -402,7 +397,7 @@ void MainWindow::stopFlashing()
   _flash_state = false;
   _flash_timer.stop();
 
-  if (IPCClient::isConnected()) {
+  if (_bridge.isConnected()) {
     systray->setIcon(QIcon(":/usbguard-icon.svg"));
   }
   else {
@@ -419,7 +414,7 @@ void MainWindow::flashStep()
     _flash_state = false;
   }
   else {
-    if (IPCClient::isConnected()) {
+    if (_bridge.isConnected()) {
       systray->setIcon(QIcon(":/usbguard-icon.svg"));
     }
     else {
@@ -436,17 +431,14 @@ void MainWindow::ipcTryConnect()
 {
   USBGUARD_LOG(Trace);
 
-  try {
-    IPCClient::connect();
-  }
-  catch (const usbguard::Exception& ex) {
+  QDBusReply<bool> reply = _bridge.tryConnect();
+  if (!reply.isValid()) {
     showMessage(QString("Connection failed: %1")
-      .arg(QString::fromStdString(ex.message())),
+      .arg(reply.error().message()),
       /*alert=*/true);
   }
-  catch (const std::exception& ex) {
-    showMessage(QString("Connection failed: std::exception: %1")
-      .arg(QString::fromStdString(ex.what())),
+  else if (!reply.value()) {
+    showMessage(QString("Connection failed: D-Bus service not available"),
       /*alert=*/true);
   }
 }
@@ -455,19 +447,11 @@ void MainWindow::allowDevice(quint32 id, bool permanent)
 {
   USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
 
-  try {
-    IPCClient::applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
-  }
-  catch (const usbguard::IPCException& ex) {
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
+  if (!reply.isValid()) {
     showMessage(QString("IPC call failed: %1: %2")
       .arg("allowDevice")
-      .arg(QString::fromStdString(ex.message())),
-      /*alert=*/true);
-  }
-  catch (const std::exception& ex) {
-    showMessage(QString("IPC call failed: %1: std::exception: %2")
-      .arg("allowDevice")
-      .arg(QString::fromStdString(ex.what())),
+      .arg(reply.error().message()),
       /*alert=*/true);
   }
 }
@@ -476,19 +460,11 @@ void MainWindow::blockDevice(quint32 id, bool permanent)
 {
   USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
 
-  try {
-    IPCClient::applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
-  }
-  catch (const usbguard::IPCException& ex) {
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
+  if (!reply.isValid()) {
     showMessage(QString("IPC call failed: %1: %2")
       .arg("blockDevice")
-      .arg(QString::fromStdString(ex.message())),
-      /*alert=*/true);
-  }
-  catch (const std::exception& ex) {
-    showMessage(QString("IPC call failed: %1: std::exception: %2")
-      .arg("blockDevice")
-      .arg(QString::fromStdString(ex.what())),
+      .arg(reply.error().message()),
       /*alert=*/true);
   }
 }
@@ -497,19 +473,11 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 {
   USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
 
-  try {
-    IPCClient::applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
-  }
-  catch (const usbguard::IPCException& ex) {
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
+  if (!reply.isValid()) {
     showMessage(QString("IPC call failed: %1: %2")
       .arg("rejectDevice")
-      .arg(QString::fromStdString(ex.message())),
-      /*alert=*/true);
-  }
-  catch (const std::exception& ex) {
-    showMessage(QString("IPC call failed: %1: std::exception: %2")
-      .arg("rejectDevice")
-      .arg(QString::fromStdString(ex.what())),
+      .arg(reply.error().message()),
       /*alert=*/true);
   }
 }
@@ -517,7 +485,6 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 void MainWindow::handleIPCConnect()
 {
   USBGUARD_LOG(Trace);
-  _ipc_timer.stop();
   notifyIPCConnected();
   systray->setIcon(QIcon(":/usbguard-icon.svg"));
   ui->device_view->setDisabled(false);
@@ -527,8 +494,6 @@ void MainWindow::handleIPCConnect()
 void MainWindow::handleIPCDisconnect()
 {
   USBGUARD_LOG(Trace);
-  IPCClient::wait();
-  _ipc_timer.start();
   notifyIPCDisconnected();
   systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
   clearDeviceList();
@@ -613,27 +578,25 @@ void MainWindow::loadDeviceList()
 {
   USBGUARD_LOG(Trace);
 
-  try {
-    for (auto device_rule : IPCClient::listDevices()) {
-      if (!_device_model.containsDevice(device_rule.getRuleID())) {
-        _device_model.insertDevice(device_rule);
-      }
-    }
-
-    ui->device_view->expandAll();
-  }
-  catch (const usbguard::IPCException& ex) {
+  QDBusPendingReply<DBusRules> reply = _bridge.listDevices("match");
+  if (!reply.isValid()) {
     showMessage(QString("IPC call failed: %1: %2")
       .arg("listDevices")
-      .arg(QString::fromStdString(ex.message())),
+      .arg(reply.error().message()),
       /*alert=*/true);
+    return;
   }
-  catch (const std::exception& ex) {
-    showMessage(QString("IPC call failed: %1: std::exception: %2")
-      .arg("listDevices")
-      .arg(QString::fromStdString(ex.what())),
-      /*alert=*/true);
+
+  const DBusRules rules = reply.value();
+  for (auto rule : rules) {
+    auto device_rule = usbguard::Rule::fromString(rule.second.toStdString());
+    device_rule.setRuleID(rule.first);
+    if (!_device_model.containsDevice(device_rule.getRuleID())) {
+      _device_model.insertDevice(device_rule);
+    }
   }
+
+  ui->device_view->expandAll();
 }
 
 void MainWindow::editDeviceListRow(const QModelIndex& index)
@@ -719,35 +682,6 @@ void MainWindow::closeEvent(QCloseEvent* e)
   USBGUARD_LOG(Trace) << "e=" << e;
   showMinimized();
   e->accept();
-}
-
-void MainWindow::DevicePresenceChanged(quint32 id,
-  usbguard::DeviceManager::EventType event,
-  usbguard::Rule::Target target,
-  const std::string& device_rule)
-{
-  emit uiDevicePresenceChanged(id, event, target, device_rule);
-}
-
-void MainWindow::DevicePolicyChanged(quint32 id,
-  usbguard::Rule::Target target_old,
-  usbguard::Rule::Target target_new,
-  const std::string& device_rule,
-  quint32 rule_id)
-{
-  emit uiDevicePolicyChanged(id, target_old, target_new, device_rule, rule_id);
-}
-
-void MainWindow::IPCConnected()
-{
-  emit uiConnected();
-}
-
-void MainWindow::IPCDisconnected(bool exception_initiated, const usbguard::IPCException& exception)
-{
-  (void)exception_initiated;
-  (void)exception;
-  emit uiDisconnected();
 }
 
 /* vim: set ts=2 sw=2 et */

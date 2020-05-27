@@ -21,10 +21,9 @@
   #include <build-config.h>
 #endif
 
+#include "DBusBridge.h"
 #include "DeviceModel.h"
 #include "TargetDelegate.h"
-
-#include "usbguard/IPCClient.hpp"
 
 #include <QSystemTrayIcon>
 #include <QMainWindow>
@@ -36,28 +35,13 @@ namespace Ui
   class MainWindow;
 }
 
-class MainWindow : public QMainWindow, public usbguard::IPCClient
+class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
 public:
   explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
-
-signals:
-  void uiDevicePresenceChanged(quint32 id,
-    usbguard::DeviceManager::EventType event,
-    usbguard::Rule::Target target,
-    const std::string& device_rule);
-
-  void uiDevicePolicyChanged(quint32 id,
-    usbguard::Rule::Target target_old,
-    usbguard::Rule::Target target_new,
-    const std::string& device_rule,
-    quint32 rule_id);
-
-  void uiConnected();
-  void uiDisconnected();
 
 protected slots:
   void switchVisibilityState(QSystemTrayIcon::ActivationReason reason);
@@ -68,16 +52,16 @@ protected slots:
   void showMessage(const QString& message, bool alert = false, bool statusbar = false);
   void showNotification(QSystemTrayIcon::MessageIcon icon, const QString& title, const QString& message);
 
-  void handleDevicePresenceChange(quint32 id,
+  void handleDevicePresenceChange(uint id,
     usbguard::DeviceManager::EventType event,
     usbguard::Rule::Target target,
-    const std::string& device_rule);
+    const QString& device_rule);
 
-  void handleDevicePolicyChange(quint32 id,
+  void handleDevicePolicyChange(uint id,
     usbguard::Rule::Target target_old,
     usbguard::Rule::Target target_new,
-    const std::string& device_rule,
-    quint32 rule_id);
+    const QString& device_rule,
+    uint rule_id);
 
   void notifyIPCConnected();
   void notifyIPCDisconnected();
@@ -112,29 +96,15 @@ protected slots:
   void startFlashing();
   void stopFlashing();
 
-  void DevicePresenceChanged(quint32 id,
-    usbguard::DeviceManager::EventType event,
-    usbguard::Rule::Target target,
-    const std::string& device_rule) override;
-
-  void DevicePolicyChanged(quint32 id,
-    usbguard::Rule::Target target_old,
-    usbguard::Rule::Target target_new,
-    const std::string& device_rule,
-    quint32 rule_id) override;
-
-  void IPCConnected() override;
-  void IPCDisconnected(bool exception_initiated, const usbguard::IPCException& exception) override;
-
 private:
   Ui::MainWindow* ui;
   QSystemTrayIcon* systray;
   QTimer _flash_timer;
   bool _flash_state;
-  QTimer _ipc_timer;
   QSettings _settings;
   DeviceModel _device_model;
   TargetDelegate _target_delegate;
+  DBusBridge _bridge;
 };
 
 /* vim: set ts=2 sw=2 et */
