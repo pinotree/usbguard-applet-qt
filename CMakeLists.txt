@@ -22,7 +22,6 @@ set(applet_SOURCES
   DeviceDialog.cpp
   DeviceModel.cpp
   MainWindow.cpp
-  SessionBlocker.cpp
   TargetDelegate.cpp
   main.cpp
 )

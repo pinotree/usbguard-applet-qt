@@ -21,12 +21,12 @@
 #endif
 
 #include "MainWindow.h"
-#include "SessionBlocker.h"
 
 #include "usbguard/Logger.hpp"
 
 #include <QApplication>
 #include <QLocale>
+#include <QSessionManager>
 #include <QTranslator>
 #include <QString>
 
@@ -48,7 +48,12 @@ int main(int argc, char* argv[])
     USBGUARD_LOG(Debug) << "Translations not available for the current locale.";
   }
 
-  const SessionBlocker block(a);
+  auto disableSessionManagement = [](QSessionManager &sm) {
+    sm.setRestartHint(QSessionManager::RestartNever);
+  };
+  QObject::connect(&a, &QGuiApplication::commitDataRequest, disableSessionManagement);
+  QObject::connect(&a, &QGuiApplication::saveStateRequest, disableSessionManagement);
+
   MainWindow w;
   a.setQuitOnLastWindowClosed(false);
   return a.exec();
