@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 project(usbguard-applet-qt)
 
-find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus)
+find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus LinguistTools)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(USBGUARD REQUIRED libusbguard)
 
@@ -17,6 +17,16 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(${USBGUARD_INCLUDE_DIRS})
 
+file(GLOB ts_files
+  "translations/*.ts"
+)
+qt5_add_translation(qm_files ${ts_files})
+add_custom_command(
+  OUTPUT translations.qrc
+  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/translations/generate_translations_qrc.sh" translations.qrc ${qm_files}
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/translations/generate_translations_qrc.sh" ${qm_files}
+)
+
 set(applet_SOURCES
   DBusBridge.cpp
   DeviceDialog.cpp
@@ -31,6 +41,7 @@ set(applet_FORMS
 )
 set(applet_RESOURCES
   resources/icon.qrc
+  "${CMAKE_BINARY_DIR}/translations.qrc"
 )
 set_source_files_properties(org.usbguard1.xml PROPERTIES INCLUDE DBusTypes.h)
 qt5_add_dbus_interface(applet_SOURCES
