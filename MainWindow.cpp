@@ -49,12 +49,6 @@ MainWindow::MainWindow(QWidget* parent) :
   _device_model(this),
   _bridge(this)
 {
-  /*
-   * Seed the pseudo-random generator. We use it for
-   * randomizing the position of the DeviceDialog window.
-   */
-  QTime time_rnd_seed = QTime::currentTime();
-  qsrand((uint)time_rnd_seed.msec());
   ui->setupUi(this);
   ui->device_view->setModel(&_device_model);
   ui->device_view->setItemDelegateForColumn(2, &_target_delegate);

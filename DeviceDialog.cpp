@@ -21,6 +21,7 @@
 #include "Log.h"
 #include <ui_DeviceDialog.h>
 
+#include <QRandomGenerator>
 #include <QStyle>
 #include <QDesktopWidget>
 
@@ -126,7 +127,16 @@ void DeviceDialog::setRejectVisible(bool state)
 
 static int randomInteger(int a, int b)
 {
-  return (qrand() % (b > a ? b - a : a - b)) + std::min(a, b);
+  int min_val;
+  int max_val;
+  if (a > b) {
+    min_val = b;
+    max_val = a;
+  } else  {
+    min_val = a;
+    max_val = b;
+  }
+  return QRandomGenerator::global()->bounded(min_val, max_val);
 }
 
 void DeviceDialog::setRandomizePosition(bool randomize)
