@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget* parent) :
     this, SLOT(commitDeviceListChanges()));
   QObject::connect(ui->reset_button, SIGNAL(pressed()),
     this, SLOT(resetDeviceList()));
-  setWindowTitle("USBGuard");
+  setWindowTitle(tr("USBGuard"));
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowState(Qt::WindowMinimized);
   setupSystemTray();
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent) :
 void MainWindow::setupSystemTray()
 {
   systray = new QSystemTrayIcon(QIcon(QLatin1String(":/usbguard-icon-inactive.svg")), this);
-  systray->setToolTip("USBGuard");
+  systray->setToolTip(tr("USBGuard"));
   auto menu = new QMenu();
   auto quit_action = new QAction(tr("Quit"), systray);
   menu->addAction(quit_action);
