@@ -100,6 +100,8 @@ void DBusBridge::createInterfaces()
   QDBusConnection bus = QDBusConnection::systemBus();
 
   _devices_interface = new OrgUsbguardDevices1Interface(service, QLatin1String("/org/usbguard1/Devices"), bus, this);
+  QObject::connect(_devices_interface, SIGNAL(DevicePolicyApplied(uint, uint, const QString&, uint, DBusAttributes)),
+    this, SLOT(dbusDevicePolicyApplied(uint, uint, const QString&, uint, DBusAttributes)));
   QObject::connect(_devices_interface, SIGNAL(DevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)),
     this, SLOT(dbusDevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)));
   QObject::connect(_devices_interface, SIGNAL(DevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)),
@@ -120,6 +122,11 @@ void DBusBridge::destroyInterfaces()
 void DBusBridge::dbusServiceRegistered()
 {
   _reconnect_timer.start();
+}
+
+void DBusBridge::dbusDevicePolicyApplied(uint id, uint target_new, const QString& device_rule, uint rule_id, DBusAttributes attributes)
+{
+  Q_EMIT devicePolicyApplied(id, static_cast<usbguard::Rule::Target>(target_new), device_rule, rule_id);
 }
 
 void DBusBridge::dbusDevicePolicyChanged(uint id, uint target_old, uint target_new, const QString& device_rule, uint rule_id, DBusAttributes attributes)
