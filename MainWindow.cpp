@@ -45,7 +45,7 @@
 MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
-  _settings("USBGuard", "usbguard-applet-qt"),
+  _settings(QLatin1String("USBGuard"), QLatin1String("usbguard-applet-qt")),
   _device_model(this),
   _bridge(this)
 {
@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget* parent) :
   QObject::connect(ui->reset_button, SIGNAL(pressed()),
     this, SLOT(resetDeviceList()));
   setWindowTitle("USBGuard");
-  setWindowIcon(QIcon(":/usbguard-icon.svg"));
+  setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowState(Qt::WindowMinimized);
   setupSystemTray();
   qRegisterMetaType<usbguard::DeviceManager::EventType>("usbguard::DeviceManager::EventType");
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 void MainWindow::setupSystemTray()
 {
-  systray = new QSystemTrayIcon(QIcon(":/usbguard-icon-inactive.svg"), this);
+  systray = new QSystemTrayIcon(QIcon(QLatin1String(":/usbguard-icon-inactive.svg")), this);
   systray->setToolTip("USBGuard");
   auto menu = new QMenu();
   auto quit_action = new QAction(tr("Quit"), systray);
@@ -191,13 +191,13 @@ void MainWindow::showDeviceDialog(quint32 id, const usbguard::Rule& device_rule)
 
 void MainWindow::showMessage(const QString& message, bool alert, bool statusbar)
 {
-  const QString mtemplate(alert ? "[%1] <b>%2</b>" : "[%1] %2");
+  const QString mtemplate(QLatin1String(alert ? "[%1] <b>%2</b>" : "[%1] %2"));
   const QString datetime = QDateTime::currentDateTime().toString();
   const QString mmessage = QString(mtemplate).arg(datetime).arg(message);
   ui->messages_text->append(mmessage);
 
   if (statusbar) {
-    const QString stemplate("[%1] %2");
+    const QString stemplate(QLatin1String("[%1] %2"));
     const QString smessage = QString(stemplate).arg(datetime).arg(message);
     ui->statusBar->showMessage(smessage);
   }
@@ -334,13 +334,13 @@ void MainWindow::notify(const QString& title, QSystemTrayIcon::MessageIcon icon,
   const QString usb_id = QString::fromStdString(device_rule.getDeviceID().toString());
   const QString name = QString::fromStdString(device_rule.getName());
   const QString port = QString::fromStdString(device_rule.getViaPort());
-  const QString message_body = QString("%1: USB ID=%2; Name=%3; Port=%4")
+  const QString message_body = QString::fromLatin1("%1: USB ID=%2; Name=%3; Port=%4")
     .arg(title).arg(usb_id).arg(name).arg(port);
   showMessage(message_body);
 
   if (show_notification) {
     const QString notification_body = \
-      QString("USB ID: %1\n"
+      QString::fromLatin1("USB ID: %1\n"
         "Name: %2\n"
         "Port: %3\n")
       .arg(usb_id).arg(name).arg(port);
@@ -358,7 +358,7 @@ void MainWindow::notifyDBusConnected()
   const QString title = tr("D-Bus Connection Established");
 
   if (ui->notify_dbus->isChecked()) {
-    showNotification(QSystemTrayIcon::Information, title, "");
+    showNotification(QSystemTrayIcon::Information, title, QLatin1String(""));
   }
 
   showMessage(title, /*alert=*/false, /*statusbar=*/true);
@@ -369,7 +369,7 @@ void MainWindow::notifyDBusDisconnected()
   const QString title = tr("D-Bus Connection Lost");
 
   if (ui->notify_dbus->isChecked()) {
-    showNotification(QSystemTrayIcon::Warning, title, "");
+    showNotification(QSystemTrayIcon::Warning, title, QLatin1String(""));
   }
 
   showMessage(title, /*alert=*/true, /*statusbar=*/true);
@@ -388,27 +388,27 @@ void MainWindow::stopFlashing()
   _flash_timer.stop();
 
   if (_bridge.isConnected()) {
-    systray->setIcon(QIcon(":/usbguard-icon.svg"));
+    systray->setIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   }
   else {
-    systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
+    systray->setIcon(QIcon(QLatin1String(":/usbguard-icon-inactive.svg")));
   }
 }
 
 void MainWindow::flashStep()
 {
   if (_flash_state) {
-    systray->setIcon(QIcon(":/usbguard-icon-warning.svg"));
+    systray->setIcon(QIcon(QLatin1String(":/usbguard-icon-warning.svg")));
     systray->show();
     _flash_timer.setInterval(250);
     _flash_state = false;
   }
   else {
     if (_bridge.isConnected()) {
-      systray->setIcon(QIcon(":/usbguard-icon.svg"));
+      systray->setIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
     }
     else {
-      systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
+      systray->setIcon(QIcon(QLatin1String(":/usbguard-icon-inactive.svg")));
     }
 
     systray->show();
@@ -423,12 +423,12 @@ void MainWindow::dbusTryConnect()
 
   QDBusReply<bool> reply = _bridge.tryConnect();
   if (!reply.isValid()) {
-    showMessage(QString("Connection failed: %1")
+    showMessage(QString::fromLatin1("Connection failed: %1")
       .arg(reply.error().message()),
       /*alert=*/true);
   }
   else if (!reply.value()) {
-    showMessage(QString("Connection failed: D-Bus service not available"),
+    showMessage(QLatin1String("Connection failed: D-Bus service not available"),
       /*alert=*/true);
   }
 }
@@ -439,8 +439,8 @@ void MainWindow::allowDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("D-Bus call failed: %1: %2")
-      .arg("allowDevice")
+    showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
+      .arg(QLatin1String("allowDevice"))
       .arg(reply.error().message()),
       /*alert=*/true);
   }
@@ -452,8 +452,8 @@ void MainWindow::blockDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("D-Bus call failed: %1: %2")
-      .arg("blockDevice")
+    showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
+      .arg(QLatin1String("blockDevice"))
       .arg(reply.error().message()),
       /*alert=*/true);
   }
@@ -465,8 +465,8 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
   if (!reply.isValid()) {
-    showMessage(QString("D-Bus call failed: %1: %2")
-      .arg("rejectDevice")
+    showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
+      .arg(QLatin1String("rejectDevice"))
       .arg(reply.error().message()),
       /*alert=*/true);
   }
@@ -476,7 +476,7 @@ void MainWindow::handleDBusConnect()
 {
   qCDebug(LOG);
   notifyDBusConnected();
-  systray->setIcon(QIcon(":/usbguard-icon.svg"));
+  systray->setIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   ui->device_view->setDisabled(false);
   loadDeviceList();
 }
@@ -485,7 +485,7 @@ void MainWindow::handleDBusDisconnect()
 {
   qCDebug(LOG);
   notifyDBusDisconnected();
-  systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
+  systray->setIcon(QIcon(QLatin1String(":/usbguard-icon-inactive.svg")));
   clearDeviceList();
   ui->device_view->setDisabled(true);
 }
@@ -509,34 +509,34 @@ void MainWindow::loadSettings()
 {
   qCDebug(LOG);
   _settings.sync();
-  _settings.beginGroup("Notifications");
-  ui->notify_inserted->setChecked(_settings.value("Inserted", true).toBool());
-  ui->notify_removed->setChecked(_settings.value("Removed", false).toBool());
-  ui->notify_allowed->setChecked(_settings.value("Allowed", true).toBool());
-  ui->notify_blocked->setChecked(_settings.value("Blocked", true).toBool());
-  ui->notify_rejected->setChecked(_settings.value("Rejected", true).toBool());
-  ui->notify_present->setChecked(_settings.value("Present", false).toBool());
+  _settings.beginGroup(QLatin1String("Notifications"));
+  ui->notify_inserted->setChecked(_settings.value(QLatin1String("Inserted"), true).toBool());
+  ui->notify_removed->setChecked(_settings.value(QLatin1String("Removed"), false).toBool());
+  ui->notify_allowed->setChecked(_settings.value(QLatin1String("Allowed"), true).toBool());
+  ui->notify_blocked->setChecked(_settings.value(QLatin1String("Blocked"), true).toBool());
+  ui->notify_rejected->setChecked(_settings.value(QLatin1String("Rejected"), true).toBool());
+  ui->notify_present->setChecked(_settings.value(QLatin1String("Present"), false).toBool());
   // Left as IPCStatus for compatibility.
-  ui->notify_dbus->setChecked(_settings.value("IPCStatus", false).toBool());
+  ui->notify_dbus->setChecked(_settings.value(QLatin1String("IPCStatus"), false).toBool());
   _settings.endGroup();
-  _settings.beginGroup("DeviceDialog");
-  const int default_decision_index = _settings.value("DefaultDecision", 1).toInt();
+  _settings.beginGroup(QLatin1String("DeviceDialog"));
+  const int default_decision_index = _settings.value(QLatin1String("DefaultDecision"), 1).toInt();
 
   if (default_decision_index >= 0 && default_decision_index < ui->default_decision_combobox->count()) {
     ui->default_decision_combobox->setCurrentIndex(default_decision_index);
   }
 
-  const int decision_method_index = _settings.value("DecisionMethod", 0).toInt();
+  const int decision_method_index = _settings.value(QLatin1String("DecisionMethod"), 0).toInt();
 
   if (decision_method_index >= 0 && decision_method_index < ui->decision_method_combobox->count()) {
     ui->decision_method_combobox->setCurrentIndex(decision_method_index);
   }
 
-  ui->decision_timeout->setValue(_settings.value("DefaultDecisionTimeout", 23).toInt());
-  ui->decision_permanent_checkbox->setChecked(_settings.value("DecisionIsPermanent", false).toBool());
-  ui->show_reject_button_checkbox->setChecked(_settings.value("ShowRejectButton", false).toBool());
-  ui->randomize_position_checkbox->setChecked(_settings.value("RandomizeWindowPosition", true).toBool());
-  ui->mask_serial_checkbox->setChecked(_settings.value("MaskSerialNumber", true).toBool());
+  ui->decision_timeout->setValue(_settings.value(QLatin1String("DefaultDecisionTimeout"), 23).toInt());
+  ui->decision_permanent_checkbox->setChecked(_settings.value(QLatin1String("DecisionIsPermanent"), false).toBool());
+  ui->show_reject_button_checkbox->setChecked(_settings.value(QLatin1String("ShowRejectButton"), false).toBool());
+  ui->randomize_position_checkbox->setChecked(_settings.value(QLatin1String("RandomizeWindowPosition"), true).toBool());
+  ui->mask_serial_checkbox->setChecked(_settings.value(QLatin1String("MaskSerialNumber"), true).toBool());
   _settings.endGroup();
 }
 
@@ -544,24 +544,24 @@ void MainWindow::saveSettings()
 {
   qCDebug(LOG);
   _settings.clear();
-  _settings.beginGroup("Notifications");
-  _settings.setValue("Inserted", ui->notify_inserted->isChecked());
-  _settings.setValue("Removed", ui->notify_removed->isChecked());
-  _settings.setValue("Allowed", ui->notify_allowed->isChecked());
-  _settings.setValue("Blocked", ui->notify_blocked->isChecked());
-  _settings.setValue("Rejected", ui->notify_rejected->isChecked());
-  _settings.setValue("Present", ui->notify_present->isChecked());
+  _settings.beginGroup(QLatin1String("Notifications"));
+  _settings.setValue(QLatin1String("Inserted"), ui->notify_inserted->isChecked());
+  _settings.setValue(QLatin1String("Removed"), ui->notify_removed->isChecked());
+  _settings.setValue(QLatin1String("Allowed"), ui->notify_allowed->isChecked());
+  _settings.setValue(QLatin1String("Blocked"), ui->notify_blocked->isChecked());
+  _settings.setValue(QLatin1String("Rejected"), ui->notify_rejected->isChecked());
+  _settings.setValue(QLatin1String("Present"), ui->notify_present->isChecked());
   // Left as IPCStatus for compatibility.
-  _settings.setValue("IPCStatus", ui->notify_dbus->isChecked());
+  _settings.setValue(QLatin1String("IPCStatus"), ui->notify_dbus->isChecked());
   _settings.endGroup();
-  _settings.beginGroup("DeviceDialog");
-  _settings.setValue("DefaultDecision", ui->default_decision_combobox->currentIndex());
-  _settings.setValue("DefaultDecisionTimeout", ui->decision_timeout->value());
-  _settings.setValue("DecisionMethod", ui->decision_method_combobox->currentIndex());
-  _settings.setValue("DecisionIsPermanent", ui->decision_permanent_checkbox->isChecked());
-  _settings.setValue("ShowRejectButton", ui->show_reject_button_checkbox->isChecked());
-  _settings.setValue("RandomizeWindowPosition", ui->randomize_position_checkbox->isChecked());
-  _settings.setValue("MaskSerialNumber", ui->mask_serial_checkbox->isChecked());
+  _settings.beginGroup(QLatin1String("DeviceDialog"));
+  _settings.setValue(QLatin1String("DefaultDecision"), ui->default_decision_combobox->currentIndex());
+  _settings.setValue(QLatin1String("DefaultDecisionTimeout"), ui->decision_timeout->value());
+  _settings.setValue(QLatin1String("DecisionMethod"), ui->decision_method_combobox->currentIndex());
+  _settings.setValue(QLatin1String("DecisionIsPermanent"), ui->decision_permanent_checkbox->isChecked());
+  _settings.setValue(QLatin1String("ShowRejectButton"), ui->show_reject_button_checkbox->isChecked());
+  _settings.setValue(QLatin1String("RandomizeWindowPosition"), ui->randomize_position_checkbox->isChecked());
+  _settings.setValue(QLatin1String("MaskSerialNumber"), ui->mask_serial_checkbox->isChecked());
   _settings.endGroup();
   _settings.sync();
 }
@@ -570,10 +570,10 @@ void MainWindow::loadDeviceList()
 {
   qCDebug(LOG);
 
-  QDBusPendingReply<DBusRules> reply = _bridge.listDevices("match");
+  QDBusPendingReply<DBusRules> reply = _bridge.listDevices(QLatin1String("match"));
   if (!reply.isValid()) {
-    showMessage(QString("D-Bus call failed: %1: %2")
-      .arg("listDevices")
+    showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
+      .arg(QLatin1String("listDevices"))
       .arg(reply.error().message()),
       /*alert=*/true);
     return;

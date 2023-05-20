@@ -75,7 +75,7 @@ QVariant DeviceModelItem::data(int column)
     return QVariant(_device_rule.getRuleID());
 
   case 1:
-    return QVariant(_requested_target != _device_rule.getTarget() ? QString('*') : QString());
+    return QVariant(_requested_target != _device_rule.getTarget() ? QLatin1String("*") : QString());
 
   case 2:
     return QVariant(QCoreApplication::translate("MainWindow",
@@ -98,7 +98,7 @@ QVariant DeviceModelItem::data(int column)
 
     for (auto interface : _device_rule.attributeWithInterface().values()) {
       interface_string.append(QString::fromStdString(interface.toRuleString()));
-      interface_string.append(" ");
+      interface_string.append(QLatin1String(" "));
     }
 
     return QVariant(interface_string);

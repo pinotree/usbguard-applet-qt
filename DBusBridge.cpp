@@ -28,7 +28,7 @@ Q_DECLARE_METATYPE(DBusRule);
 Q_DECLARE_METATYPE(DBusRules);
 Q_DECLARE_METATYPE(DBusAttributes);
 
-const QString DBusBridge::service = "org.usbguard1";
+const QString DBusBridge::service = QLatin1String("org.usbguard1");
 
 DBusBridge::DBusBridge(QObject* parent) :
   QObject(parent),
@@ -99,7 +99,7 @@ void DBusBridge::createInterfaces()
 {
   QDBusConnection bus = QDBusConnection::systemBus();
 
-  _devices_interface = new OrgUsbguardDevices1Interface(service, "/org/usbguard1/Devices", bus, this);
+  _devices_interface = new OrgUsbguardDevices1Interface(service, QLatin1String("/org/usbguard1/Devices"), bus, this);
   QObject::connect(_devices_interface, SIGNAL(DevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)),
     this, SLOT(dbusDevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)));
   QObject::connect(_devices_interface, SIGNAL(DevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)),

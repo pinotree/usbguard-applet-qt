@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
   if (translator.load(QLocale::system(),
       /*filename=*/QString(),
       /*prefix=*/QString(),
-      /*directory=*/":/translations",
-      /*suffix=*/".qm")) {
+      /*directory=*/QLatin1String(":/translations"),
+      /*suffix=*/QLatin1String(".qm"))) {
     a.installTranslator(&translator);
   }
   else {

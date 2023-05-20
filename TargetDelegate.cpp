@@ -36,9 +36,9 @@ QWidget* TargetDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
   QComboBox* editor = new QComboBox(parent);
   editor->setFrame(false);
   editor->setAutoFillBackground(true);
-  editor->addItem(tr("allow"), QString("allow"));
-  editor->addItem(tr("block"), QString("block"));
-  editor->addItem(tr("reject"), QString("reject"));
+  editor->addItem(tr("allow"), QLatin1String("allow"));
+  editor->addItem(tr("block"), QLatin1String("block"));
+  editor->addItem(tr("reject"), QLatin1String("reject"));
   return editor;
 }
 

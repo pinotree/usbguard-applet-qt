@@ -32,7 +32,7 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   qCDebug(LOG) << "Creating DeviceDialog for device_id=" << id;
   ui->setupUi(this);
   setWindowTitle(QString(tr("USB Device Inserted")));
-  setWindowIcon(QIcon(":/usbguard-icon.svg"));
+  setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
   connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
   device_id = id;
@@ -51,7 +51,7 @@ void DeviceDialog::setName(const QString& name)
 
 void DeviceDialog::setDeviceID(const QString& vendor_id, const QString& product_id)
 {
-  ui->deviceid_label->setText(QString("%1:%2").arg(vendor_id).arg(product_id));
+  ui->deviceid_label->setText(QString::fromLatin1("%1:%2").arg(vendor_id).arg(product_id));
 }
 
 void DeviceDialog::setSerial(const QString& serial)
@@ -62,7 +62,7 @@ void DeviceDialog::setSerial(const QString& serial)
   if (_mask_serial_number) {
     for (auto i = _serial.size(), p = 1; i > 0; --i, ++p) {
       if ((p % 2) == 0) {
-        _serial[i - 1] = '*';
+        _serial[i - 1] = QLatin1Char('*');
       }
     }
   }
@@ -221,7 +221,7 @@ void DeviceDialog::updateDialog()
   }
 
   if (timer.isActive()) {
-    button->setText(QString("%1 [%2]").arg(label).arg(time_left));
+    button->setText(QString::fromLatin1("%1 [%2]").arg(label).arg(time_left));
   }
   else {
     button->setText(label);
