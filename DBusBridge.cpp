@@ -105,13 +105,13 @@ void DBusBridge::createInterfaces()
   QObject::connect(_devices_interface, SIGNAL(DevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)),
     this, SLOT(dbusDevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)));
 
-  emit serviceAvailable();
+  Q_EMIT serviceAvailable();
 }
 
 void DBusBridge::destroyInterfaces()
 {
   _reconnect_timer.stop();
-  emit serviceUnavailable();
+  Q_EMIT serviceUnavailable();
 
   delete _devices_interface;
   _devices_interface = nullptr;
@@ -124,10 +124,10 @@ void DBusBridge::dbusServiceRegistered()
 
 void DBusBridge::dbusDevicePolicyChanged(uint id, uint target_old, uint target_new, const QString& device_rule, uint rule_id, DBusAttributes attributes)
 {
-  emit devicePolicyChanged(id, static_cast<usbguard::Rule::Target>(target_old), static_cast<usbguard::Rule::Target>(target_new), device_rule, rule_id);
+  Q_EMIT devicePolicyChanged(id, static_cast<usbguard::Rule::Target>(target_old), static_cast<usbguard::Rule::Target>(target_new), device_rule, rule_id);
 }
 
 void DBusBridge::dbusDevicePresenceChanged(uint id, uint event, uint target, const QString& device_rule, DBusAttributes attributes)
 {
-  emit devicePresenceChanged(id, static_cast<usbguard::DeviceManager::EventType>(event), static_cast<usbguard::Rule::Target>(target), device_rule);
+  Q_EMIT devicePresenceChanged(id, static_cast<usbguard::DeviceManager::EventType>(event), static_cast<usbguard::Rule::Target>(target), device_rule);
 }

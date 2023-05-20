@@ -388,7 +388,7 @@ void DeviceModel::updateDeviceTarget(quint32 device_id, usbguard::Rule::Target t
 
   if (item->getDeviceTarget() != target) {
     item->setDeviceTarget(target);
-    emit dataChanged(createIndex(item->row(), 0, item),
+    Q_EMIT dataChanged(createIndex(item->row(), 0, item),
       createIndex(item->row(), item->columnCount() - 1, item),
       QVector<int>() << Qt::DisplayRole);
   }
@@ -401,7 +401,7 @@ void DeviceModel::updateRequestedTarget(DeviceModelItem* item, usbguard::Rule::T
 
   if (item->getRequestedTarget() != target) {
     item->setRequestedTarget(target);
-    emit dataChanged(createIndex(item->row(), 0, item),
+    Q_EMIT dataChanged(createIndex(item->row(), 0, item),
       createIndex(item->row(), item->columnCount() - 1, item),
       QVector<int>() << Qt::DisplayRole);
   }

@@ -251,19 +251,19 @@ DeviceDialog::~DeviceDialog()
 
 void DeviceDialog::on_allow_button_clicked()
 {
-  emit allowed(device_id, ui->permanent_checkbox->isChecked());
+  Q_EMIT allowed(device_id, ui->permanent_checkbox->isChecked());
   accept();
 }
 
 void DeviceDialog::on_block_button_clicked()
 {
-  emit blocked(device_id, ui->permanent_checkbox->isChecked());
+  Q_EMIT blocked(device_id, ui->permanent_checkbox->isChecked());
   accept();
 }
 
 void DeviceDialog::on_reject_button_clicked()
 {
-  emit rejected(device_id, ui->permanent_checkbox->isChecked());
+  Q_EMIT rejected(device_id, ui->permanent_checkbox->isChecked());
   accept();
 }
 
