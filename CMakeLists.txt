@@ -15,6 +15,15 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
+add_definitions(-DQT_STRICT_ITERATORS)
+add_definitions(-DQT_NO_URL_CAST_FROM_STRING)
+add_definitions(-DQT_DEPRECATED_WARNINGS)
+add_definitions(-DQT_NO_KEYWORDS)
+add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
+add_definitions(-DQT_NO_CAST_TO_ASCII)
+add_definitions(-DQT_NO_CAST_FROM_ASCII)
+
 file(GLOB ts_files
   "translations/*.ts"
 )
