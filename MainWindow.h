@@ -40,7 +40,7 @@ public:
   explicit MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
 
-protected slots:
+protected Q_SLOTS:
   void switchVisibilityState(QSystemTrayIcon::ActivationReason reason);
   void flashStep();
   void dbusTryConnect();

@@ -60,7 +60,7 @@ signals:
   void blocked(quint32 id, bool permanent);
   void rejected(quint32 id, bool permanent);
 
-protected slots:
+protected Q_SLOTS:
   void timerUpdate();
 
 protected:
@@ -70,7 +70,7 @@ protected:
   void executeDefaultDecision();
   void setPosition(bool randomized);
 
-private slots:
+private Q_SLOTS:
   void on_allow_button_clicked();
   void on_block_button_clicked();
   void on_reject_button_clicked();

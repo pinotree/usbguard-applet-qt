@@ -50,7 +50,7 @@ signals:
   void devicePolicyChanged(uint id, usbguard::Rule::Target target_old, usbguard::Rule::Target target_new, const QString& device_rule, uint rule_id);
   void devicePresenceChanged(uint id, usbguard::DeviceManager::EventType event, usbguard::Rule::Target target, const QString& device_rule);
 
-private slots:
+private Q_SLOTS:
   void createInterfaces();
   void destroyInterfaces();
   void dbusServiceRegistered();
