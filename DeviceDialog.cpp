@@ -22,8 +22,8 @@
 #include <ui_DeviceDialog.h>
 
 #include <QRandomGenerator>
+#include <QScreen>
 #include <QStyle>
-#include <QDesktopWidget>
 
 DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   QDialog(parent),
@@ -143,7 +143,7 @@ void DeviceDialog::setRandomizePosition(bool randomize)
 {
   QRect position_rect = \
     QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-      size(), qApp->desktop()->availableGeometry());
+      size(), qGuiApp->primaryScreen()->availableGeometry());
 
   if (randomize) {
     const int h = ui->block_button->height();
