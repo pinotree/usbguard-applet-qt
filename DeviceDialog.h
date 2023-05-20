@@ -55,7 +55,7 @@ public:
   void setRandomizePosition(bool randomize);
   void setMaskSerialNumber(bool state);
 
-signals:
+Q_SIGNALS:
   void allowed(quint32 id, bool permanent);
   void blocked(quint32 id, bool permanent);
   void rejected(quint32 id, bool permanent);

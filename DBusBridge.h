@@ -44,7 +44,7 @@ public:
   QDBusPendingReply<DBusRules> listDevices(const QString& query);
   QDBusPendingReply<uint> applyDevicePolicy(uint id, usbguard::Rule::Target target, bool permanent);
 
-signals:
+Q_SIGNALS:
   void serviceAvailable();
   void serviceUnavailable();
   void devicePolicyChanged(uint id, usbguard::Rule::Target target_old, usbguard::Rule::Target target_new, const QString& device_rule, uint rule_id);
