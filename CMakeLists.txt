@@ -3,7 +3,7 @@ project(usbguard-applet-qt)
 
 find_package(Qt5 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus LinguistTools)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(USBGUARD REQUIRED libusbguard)
+pkg_check_modules(USBGUARD REQUIRED IMPORTED_TARGET libusbguard)
 
 include(GNUInstallDirs)
 
@@ -14,8 +14,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-include_directories(${USBGUARD_INCLUDE_DIRS})
 
 file(GLOB ts_files
   "translations/*.ts"
@@ -60,7 +58,7 @@ target_link_libraries(usbguard-applet-qt
   Qt5::Gui
   Qt5::Widgets
   Qt5::DBus
-  ${USBGUARD_LIBRARIES}
+  PkgConfig::USBGUARD
 )
 
 install(TARGETS usbguard-applet-qt
