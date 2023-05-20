@@ -22,8 +22,7 @@
 #include <ui_MainWindow.h>
 #include "DeviceDialog.h"
 #include "DBusBridge.h"
-
-#include <Logger.hpp>
+#include "Log.h"
 
 #include <QString>
 #include <QSystemTrayIcon>
@@ -128,19 +127,19 @@ void MainWindow::setupSettingsWatcher()
 
 void MainWindow::switchVisibilityState(QSystemTrayIcon::ActivationReason reason)
 {
-  USBGUARD_LOG(Trace) << "reason=" << reason;
+  qCDebug(LOG) << "reason=" << reason;
 
   if (reason == QSystemTrayIcon::Context) {
     systray->contextMenu()->show();
   }
   else {
     if (!isVisible() || (windowState() & Qt::WindowMinimized)) {
-      USBGUARD_LOG(Trace) << "Showing main window";
+      qCDebug(LOG) << "Showing main window";
       showNormal();
       stopFlashing();
     }
     else {
-      USBGUARD_LOG(Trace) << "Minimizing main window";
+      qCDebug(LOG) << "Minimizing main window";
       showMinimized();
     }
   }
@@ -426,7 +425,7 @@ void MainWindow::flashStep()
 
 void MainWindow::dbusTryConnect()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
 
   QDBusReply<bool> reply = _bridge.tryConnect();
   if (!reply.isValid()) {
@@ -442,7 +441,7 @@ void MainWindow::dbusTryConnect()
 
 void MainWindow::allowDevice(quint32 id, bool permanent)
 {
-  USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
+  qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
   if (!reply.isValid()) {
@@ -455,7 +454,7 @@ void MainWindow::allowDevice(quint32 id, bool permanent)
 
 void MainWindow::blockDevice(quint32 id, bool permanent)
 {
-  USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
+  qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
   if (!reply.isValid()) {
@@ -468,7 +467,7 @@ void MainWindow::blockDevice(quint32 id, bool permanent)
 
 void MainWindow::rejectDevice(quint32 id, bool permanent)
 {
-  USBGUARD_LOG(Trace) << "id=" << id << " permanent=" << permanent;
+  qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
   QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
   if (!reply.isValid()) {
@@ -481,7 +480,7 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 
 void MainWindow::handleDBusConnect()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
   notifyDBusConnected();
   systray->setIcon(QIcon(":/usbguard-icon.svg"));
   ui->device_view->setDisabled(false);
@@ -490,7 +489,7 @@ void MainWindow::handleDBusConnect()
 
 void MainWindow::handleDBusDisconnect()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
   notifyDBusDisconnected();
   systray->setIcon(QIcon(":/usbguard-icon-inactive.svg"));
   clearDeviceList();
@@ -499,13 +498,13 @@ void MainWindow::handleDBusDisconnect()
 
 void MainWindow::handleDeviceInsert(quint32 id, const usbguard::Rule& device_rule)
 {
-  USBGUARD_LOG(Trace) << "id=" << id << " device_rule=" << device_rule.toString();
+  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule.toString();
   loadDeviceList();
 }
 
 void MainWindow::handleDeviceRemove(quint32 id, const usbguard::Rule& device_rule)
 {
-  USBGUARD_LOG(Trace) << "id=" << id << " device_rule=" << device_rule.toString();
+  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule.toString();
   ui->device_view->selectionModel()->clearSelection();
   ui->device_view->reset();
   _device_model.removeDevice(id);
@@ -514,7 +513,7 @@ void MainWindow::handleDeviceRemove(quint32 id, const usbguard::Rule& device_rul
 
 void MainWindow::loadSettings()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
   _settings.sync();
   _settings.beginGroup("Notifications");
   ui->notify_inserted->setChecked(_settings.value("Inserted", true).toBool());
@@ -549,7 +548,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::saveSettings()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
   _settings.clear();
   _settings.beginGroup("Notifications");
   _settings.setValue("Inserted", ui->notify_inserted->isChecked());
@@ -575,7 +574,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadDeviceList()
 {
-  USBGUARD_LOG(Trace);
+  qCDebug(LOG);
 
   QDBusPendingReply<DBusRules> reply = _bridge.listDevices("match");
   if (!reply.isValid()) {
@@ -655,20 +654,20 @@ void MainWindow::resetDeviceList()
 
 void MainWindow::changeEvent(QEvent* e)
 {
-  USBGUARD_LOG(Trace) << "e->type=" << e->type();
+  qCDebug(LOG) << "e->type=" << e->type();
 
   if (e->type() == QEvent::LanguageChange) {
-    USBGUARD_LOG(Trace) << "QEvent::LanguageChange";
+    qCDebug(LOG) << "QEvent::LanguageChange";
     ui->retranslateUi(this);
   }
   else if (e->type() == QEvent::WindowStateChange) {
-    USBGUARD_LOG(Trace) << "QEvent::WindowStateChange";
+    qCDebug(LOG) << "QEvent::WindowStateChange";
     QWindowStateChangeEvent* event = \
       static_cast<QWindowStateChangeEvent*>(e);
 
     if (!(event->oldState() & Qt::WindowMinimized)
       && (windowState() & Qt::WindowMinimized)) {
-      USBGUARD_LOG(Trace) << "Qt::WindowMinimized";
+      qCDebug(LOG) << "Qt::WindowMinimized";
       QTimer::singleShot(250, this, SLOT(hide()));
     }
   }
@@ -678,7 +677,7 @@ void MainWindow::changeEvent(QEvent* e)
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-  USBGUARD_LOG(Trace) << "e=" << e;
+  qCDebug(LOG) << "e=" << e;
   showMinimized();
   e->accept();
 }

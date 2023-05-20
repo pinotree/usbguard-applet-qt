@@ -18,8 +18,7 @@
 //
 
 #include "MainWindow.h"
-
-#include <Logger.hpp>
+#include "Log.h"
 
 #include <QApplication>
 #include <QLocale>
@@ -31,8 +30,8 @@ int main(int argc, char* argv[])
 {
   QApplication a(argc, argv);
   QTranslator translator;
-  USBGUARD_LOG(Debug) << "Loading translations for locale: "
-    << QLocale::system().name().toStdString();
+  qCDebug(LOG) << "Loading translations for locale: "
+    << QLocale::system().name();
 
   if (translator.load(QLocale::system(),
       /*filename=*/QString(),
@@ -42,7 +41,7 @@ int main(int argc, char* argv[])
     a.installTranslator(&translator);
   }
   else {
-    USBGUARD_LOG(Debug) << "Translations not available for the current locale.";
+    qCDebug(LOG) << "Translations not available for the current locale.";
   }
 
   auto disableSessionManagement = [](QSessionManager &sm) {

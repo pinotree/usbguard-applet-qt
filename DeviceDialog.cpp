@@ -18,9 +18,8 @@
 //
 
 #include "DeviceDialog.h"
+#include "Log.h"
 #include <ui_DeviceDialog.h>
-
-#include <Logger.hpp>
 
 #include <QStyle>
 #include <QDesktopWidget>
@@ -29,7 +28,7 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   QDialog(parent),
   ui(new Ui::DeviceDialog)
 {
-  USBGUARD_LOG(Trace) << "Creating DeviceDialog for device_id=" << id;
+  qCDebug(LOG) << "Creating DeviceDialog for device_id=" << id;
   ui->setupUi(this);
   setWindowTitle(QString(tr("USB Device Inserted")));
   setWindowIcon(QIcon(":/usbguard-icon.svg"));
@@ -56,7 +55,7 @@ void DeviceDialog::setDeviceID(const QString& vendor_id, const QString& product_
 
 void DeviceDialog::setSerial(const QString& serial)
 {
-  USBGUARD_LOG(Trace) << "Masking serial number value";
+  qCDebug(LOG) << "Masking serial number value";
   _serial = serial;
 
   if (_mask_serial_number) {
@@ -222,7 +221,7 @@ void DeviceDialog::updateDialog()
 
 void DeviceDialog::executeDefaultDecision()
 {
-  USBGUARD_LOG(Debug) << "Executing default decision: "
+  qCDebug(LOG) << "Executing default decision: "
     << usbguard::Rule::targetToString(_default_decision);
 
   switch (_default_decision) {

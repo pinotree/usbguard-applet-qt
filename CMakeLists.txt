@@ -29,6 +29,7 @@ set(applet_SOURCES
   DBusBridge.cpp
   DeviceDialog.cpp
   DeviceModel.cpp
+  Log.cpp
   MainWindow.cpp
   TargetDelegate.cpp
   main.cpp
