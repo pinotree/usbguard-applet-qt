@@ -63,7 +63,7 @@ class DeviceModel : public QAbstractItemModel
   Q_OBJECT
 
 public:
-  explicit DeviceModel(QObject* parent = 0);
+  explicit DeviceModel(QObject* parent = nullptr);
   ~DeviceModel();
 
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

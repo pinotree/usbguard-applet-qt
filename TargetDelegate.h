@@ -25,7 +25,7 @@ class TargetDelegate : public QStyledItemDelegate
   Q_OBJECT
 
 public:
-  TargetDelegate(QObject* parent = 0);
+  TargetDelegate(QObject* parent = nullptr);
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
   void setEditorData(QWidget* editor, const QModelIndex& index) const override;

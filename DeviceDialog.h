@@ -39,7 +39,7 @@ public:
     MathTest
   };
 
-  explicit DeviceDialog(quint32 id, QWidget* parent = 0);
+  explicit DeviceDialog(quint32 id, QWidget* parent = nullptr);
   ~DeviceDialog();
 
   void setName(const QString& name);
