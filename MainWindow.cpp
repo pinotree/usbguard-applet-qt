@@ -23,7 +23,7 @@
 #include "DeviceDialog.h"
 #include "DBusBridge.h"
 
-#include "usbguard/Logger.hpp"
+#include <Logger.hpp>
 
 #include <QString>
 #include <QSystemTrayIcon>

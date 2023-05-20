@@ -20,7 +20,7 @@
 #include "DeviceDialog.h"
 #include <ui_DeviceDialog.h>
 
-#include "usbguard/Logger.hpp"
+#include <Logger.hpp>
 
 #include <QStyle>
 #include <QDesktopWidget>

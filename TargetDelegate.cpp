@@ -20,7 +20,7 @@
 #include "TargetDelegate.h"
 #include "DeviceModel.h"
 
-#include "usbguard/Rule.hpp"
+#include <Rule.hpp>
 
 #include <QComboBox>
 

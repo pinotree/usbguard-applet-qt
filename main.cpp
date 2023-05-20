@@ -19,7 +19,7 @@
 
 #include "MainWindow.h"
 
-#include "usbguard/Logger.hpp"
+#include <Logger.hpp>
 
 #include <QApplication>
 #include <QLocale>

@@ -18,7 +18,7 @@
 //
 #pragma once
 
-#include "usbguard/Rule.hpp"
+#include <Rule.hpp>
 
 #include <QAbstractItemModel>
 #include <QList>

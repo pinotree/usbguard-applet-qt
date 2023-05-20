@@ -19,7 +19,7 @@
 
 #include "DeviceModel.h"
 
-#include "usbguard/Logger.hpp"
+#include <Logger.hpp>
 
 #include <iostream>
 #include <QVector>
