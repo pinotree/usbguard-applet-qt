@@ -31,7 +31,7 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
 {
   qCDebug(LOG) << "Creating DeviceDialog for device_id=" << id;
   ui->setupUi(this);
-  setWindowTitle(QString(tr("USB Device Inserted")));
+  setWindowTitle(tr("USB Device Inserted"));
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
   connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -201,12 +201,12 @@ void DeviceDialog::updateDialog()
   switch (_default_decision) {
   case usbguard::Rule::Target::Allow:
     button = ui->allow_button;
-    label = QString(tr("Allow"));
+    label = tr("Allow");
     break;
 
   case usbguard::Rule::Target::Block:
     button = ui->block_button;
-    label = QString(tr("Block"));
+    label = tr("Block");
     break;
 
   case usbguard::Rule::Target::Reject:
@@ -217,7 +217,7 @@ void DeviceDialog::updateDialog()
   case usbguard::Rule::Target::Unknown:
   default:
     button = ui->reject_button;
-    label = QString(tr("Reject"));
+    label = tr("Reject");
   }
 
   if (timer.isActive()) {
