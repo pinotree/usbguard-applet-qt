@@ -78,8 +78,24 @@ QVariant DeviceModelItem::data(int column)
     return QVariant(_requested_target != _device_rule.getTarget() ? QLatin1String("*") : QString());
 
   case 2:
-    return QVariant(QCoreApplication::translate("MainWindow",
-          usbguard::Rule::targetToString(_requested_target).c_str()));
+    switch (_requested_target) {
+    case usbguard::Rule::Target::Allow:
+      return QCoreApplication::translate("DeviceModel", "Allow");
+
+    case usbguard::Rule::Target::Block:
+      return QCoreApplication::translate("DeviceModel", "Block");
+
+    case usbguard::Rule::Target::Reject:
+      return QCoreApplication::translate("DeviceModel", "Reject");
+
+    case usbguard::Rule::Target::Unknown:
+    case usbguard::Rule::Target::Empty:
+    case usbguard::Rule::Target::Invalid:
+    case usbguard::Rule::Target::Match:
+    case usbguard::Rule::Target::Device:
+    default:
+      return QVariant(QString::fromStdString(usbguard::Rule::targetToString(_requested_target)));
+    }
 
   case 3:
     return QVariant(QString::fromStdString(_device_rule.getDeviceID().toString()));

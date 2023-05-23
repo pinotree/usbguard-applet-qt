@@ -23,6 +23,7 @@
 #include <Rule.hpp>
 
 #include <QComboBox>
+#include <QCoreApplication>
 
 TargetDelegate::TargetDelegate(QObject* parent)
   : QStyledItemDelegate(parent)
@@ -36,9 +37,9 @@ QWidget* TargetDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
   QComboBox* editor = new QComboBox(parent);
   editor->setFrame(false);
   editor->setAutoFillBackground(true);
-  editor->addItem(tr("allow"), QLatin1String("allow"));
-  editor->addItem(tr("block"), QLatin1String("block"));
-  editor->addItem(tr("reject"), QLatin1String("reject"));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Allow"), QLatin1String("allow"));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Block"), QLatin1String("block"));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Reject"), QLatin1String("reject"));
   return editor;
 }
 
