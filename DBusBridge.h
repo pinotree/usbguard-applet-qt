@@ -26,8 +26,6 @@
 #include <QObject>
 #include <QTimer>
 
-#include <DeviceManager.hpp>
-
 class QDBusServiceWatcher;
 class OrgUsbguardDevices1Interface;
 
