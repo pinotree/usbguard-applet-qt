@@ -39,7 +39,7 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   setDecisionMethod(DecisionMethod::Buttons);
   setDefaultDecisionTimeout(23);
   setRandomizePosition(false);
-  setDefaultDecision(usbguard::Rule::Target::Block);
+  setDefaultDecision(Rule::Target::Block);
   updateDialog();
   timer.start(1000);
 }
@@ -79,23 +79,23 @@ void DeviceDialog::setInterfaceTypes(const std::vector<usbguard::USBInterfaceTyp
   }
 }
 
-void DeviceDialog::setDefaultDecision(usbguard::Rule::Target target)
+void DeviceDialog::setDefaultDecision(Rule::Target target)
 {
   switch (target) {
-  case usbguard::Rule::Target::Allow:
+  case Rule::Target::Allow:
     ui->allow_button->setFocus();
     break;
 
-  case usbguard::Rule::Target::Block:
+  case Rule::Target::Block:
     ui->block_button->setFocus();
     break;
 
-  case usbguard::Rule::Target::Reject:
-  case usbguard::Rule::Target::Unknown:
-  case usbguard::Rule::Target::Empty:
-  case usbguard::Rule::Target::Invalid:
-  case usbguard::Rule::Target::Match:
-  case usbguard::Rule::Target::Device:
+  case Rule::Target::Reject:
+  case Rule::Target::Unknown:
+  case Rule::Target::Empty:
+  case Rule::Target::Invalid:
+  case Rule::Target::Match:
+  case Rule::Target::Device:
   default:
     ui->reject_button->setFocus();
   }
@@ -199,22 +199,22 @@ void DeviceDialog::updateDialog()
   QString label;
 
   switch (_default_decision) {
-  case usbguard::Rule::Target::Allow:
+  case Rule::Target::Allow:
     button = ui->allow_button;
     label = tr("Allow");
     break;
 
-  case usbguard::Rule::Target::Block:
+  case Rule::Target::Block:
     button = ui->block_button;
     label = tr("Block");
     break;
 
-  case usbguard::Rule::Target::Reject:
-  case usbguard::Rule::Target::Match:
-  case usbguard::Rule::Target::Device:
-  case usbguard::Rule::Target::Invalid:
-  case usbguard::Rule::Target::Empty:
-  case usbguard::Rule::Target::Unknown:
+  case Rule::Target::Reject:
+  case Rule::Target::Match:
+  case Rule::Target::Device:
+  case Rule::Target::Invalid:
+  case Rule::Target::Empty:
+  case Rule::Target::Unknown:
   default:
     button = ui->reject_button;
     label = tr("Reject");
@@ -232,23 +232,23 @@ void DeviceDialog::updateDialog()
 void DeviceDialog::executeDefaultDecision()
 {
   qCDebug(LOG) << "Executing default decision: "
-    << usbguard::Rule::targetToString(_default_decision);
+    << _default_decision;
 
   switch (_default_decision) {
-  case usbguard::Rule::Target::Allow:
+  case Rule::Target::Allow:
     on_allow_button_clicked();
     break;
 
-  case usbguard::Rule::Target::Block:
+  case Rule::Target::Block:
     on_block_button_clicked();
     break;
 
-  case usbguard::Rule::Target::Reject:
-  case usbguard::Rule::Target::Unknown:
-  case usbguard::Rule::Target::Empty:
-  case usbguard::Rule::Target::Invalid:
-  case usbguard::Rule::Target::Device:
-  case usbguard::Rule::Target::Match:
+  case Rule::Target::Reject:
+  case Rule::Target::Unknown:
+  case Rule::Target::Empty:
+  case Rule::Target::Invalid:
+  case Rule::Target::Device:
+  case Rule::Target::Match:
   default:
     on_allow_button_clicked();
   }

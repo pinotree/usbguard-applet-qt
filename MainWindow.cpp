@@ -67,11 +67,11 @@ MainWindow::MainWindow(QWidget* parent) :
   setWindowState(Qt::WindowMinimized);
   setupSystemTray();
   qRegisterMetaType<usbguard::DeviceManager::EventType>("usbguard::DeviceManager::EventType");
-  qRegisterMetaType<usbguard::Rule::Target>("usbguard::Rule::Target");
-  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, usbguard::DeviceManager::EventType, usbguard::Rule::Target, const QString &)),
-    this, SLOT(handleDevicePresenceChange(uint, usbguard::DeviceManager::EventType, usbguard::Rule::Target, const QString&)));
-  QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)),
-    this, SLOT(handleDevicePolicyChange(uint, usbguard::Rule::Target, usbguard::Rule::Target, const QString&, uint)));
+  qRegisterMetaType<Rule::Target>("Rule::Target");
+  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, usbguard::DeviceManager::EventType, Rule::Target, const QString &)),
+    this, SLOT(handleDevicePresenceChange(uint, usbguard::DeviceManager::EventType, Rule::Target, const QString&)));
+  QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, Rule::Target, Rule::Target, const QString&, uint)),
+    this, SLOT(handleDevicePolicyChange(uint, Rule::Target, Rule::Target, const QString&, uint)));
   QObject::connect(&_bridge, SIGNAL(serviceAvailable()),
     this, SLOT(handleDBusConnect()));
   QObject::connect(&_bridge, SIGNAL(serviceUnavailable()),
@@ -144,35 +144,35 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-void MainWindow::showDeviceDialog(quint32 id, const usbguard::Rule& device_rule)
+void MainWindow::showDeviceDialog(quint32 id, const Rule& device_rule)
 {
   auto dialog = new DeviceDialog(id);
   dialog->setRejectVisible(ui->show_reject_button_checkbox->isChecked());
   dialog->setDefaultDecisionTimeout(ui->decision_timeout->value());
   dialog->setMaskSerialNumber(ui->mask_serial_checkbox->isChecked());
   dialog->setDecisionIsPermanent(ui->decision_permanent_checkbox->isChecked());
-  usbguard::Rule::Target default_target = usbguard::Rule::Target::Block;
+  Rule::Target default_target = Rule::Target::Block;
 
   switch (ui->default_decision_combobox->currentIndex()) {
   case 0:
-    default_target = usbguard::Rule::Target::Allow;
+    default_target = Rule::Target::Allow;
     break;
 
   case 1:
-    default_target = usbguard::Rule::Target::Block;
+    default_target = Rule::Target::Block;
     break;
 
   case 2:
-    default_target = usbguard::Rule::Target::Reject;
+    default_target = Rule::Target::Reject;
     break;
 
   default:
-    default_target = usbguard::Rule::Target::Block;
+    default_target = Rule::Target::Block;
   }
 
   dialog->setDefaultDecision(default_target);
-  dialog->setName(QString::fromStdString(device_rule.getName()));
-  dialog->setSerial(QString::fromStdString(device_rule.getSerial()));
+  dialog->setName(device_rule.getName());
+  dialog->setSerial(device_rule.getSerial());
   dialog->setDeviceID(QString::fromStdString(device_rule.getDeviceID().getVendorID()),
     QString::fromStdString(device_rule.getDeviceID().getProductID()));
   dialog->setInterfaceTypes(device_rule.attributeWithInterface().values());
@@ -205,11 +205,11 @@ void MainWindow::showMessage(const QString& message, bool alert, bool statusbar)
 
 void MainWindow::handleDevicePresenceChange(uint id,
   usbguard::DeviceManager::EventType event,
-  usbguard::Rule::Target target,
+  Rule::Target target,
   const QString& device_rule_string)
 {
   (void)target;
-  auto device_rule = usbguard::Rule::fromString(device_rule_string.toStdString());
+  auto device_rule = Rule::fromString(device_rule_string);
 
   switch (event) {
   case usbguard::DeviceManager::EventType::Insert:
@@ -231,25 +231,25 @@ void MainWindow::handleDevicePresenceChange(uint id,
 }
 
 void MainWindow::handleDevicePolicyChange(uint id,
-  usbguard::Rule::Target target_old,
-  usbguard::Rule::Target target_new,
+  Rule::Target target_old,
+  Rule::Target target_new,
   const QString& device_rule_string,
   uint rule_id)
 {
   (void)target_old;
-  auto device_rule = usbguard::Rule::fromString(device_rule_string.toStdString());
+  auto device_rule = Rule::fromString(device_rule_string);
   _device_model.updateDeviceTarget(id, target_new);
   ui->device_view->expandAll();
   notifyDevicePolicyChanged(device_rule, rule_id);
 
-  if (target_new == usbguard::Rule::Target::Block &&
-    rule_id == usbguard::Rule::ImplicitID) {
+  if (target_new == Rule::Target::Block &&
+    rule_id == Rule::ImplicitID) {
     showDeviceDialog(id, device_rule);
   }
 }
 
 void MainWindow::notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event,
-  const usbguard::Rule& device_rule)
+  const Rule& device_rule)
 {
   QString title;
   bool show_notification = true;
@@ -284,7 +284,7 @@ void MainWindow::notifyDevicePresenceChanged(usbguard::DeviceManager::EventType 
   notify(title, notification_icon, device_rule, show_notification);
 }
 
-void MainWindow::notifyDevicePolicyChanged(const usbguard::Rule& device_rule, quint32 rule_id)
+void MainWindow::notifyDevicePolicyChanged(const Rule& device_rule, quint32 rule_id)
 {
   (void)rule_id;
   QString title;
@@ -293,18 +293,18 @@ void MainWindow::notifyDevicePolicyChanged(const usbguard::Rule& device_rule, qu
     QSystemTrayIcon::Information;
 
   switch (device_rule.getTarget()) {
-  case usbguard::Rule::Target::Allow:
+  case Rule::Target::Allow:
     title = tr("USB Device Allowed");
     show_notification = ui->notify_allowed->isChecked();
     break;
 
-  case usbguard::Rule::Target::Block:
+  case Rule::Target::Block:
     title = tr("USB Device Blocked");
     show_notification = ui->notify_blocked->isChecked();
     notification_icon = QSystemTrayIcon::Warning;
     break;
 
-  case usbguard::Rule::Target::Reject:
+  case Rule::Target::Reject:
     title = tr("USB Device Rejected");
     show_notification = ui->notify_rejected->isChecked();
     notification_icon = QSystemTrayIcon::Warning;
@@ -315,11 +315,11 @@ void MainWindow::notifyDevicePolicyChanged(const usbguard::Rule& device_rule, qu
 
     break;
 
-  case usbguard::Rule::Target::Invalid:
-  case usbguard::Rule::Target::Empty:
-  case usbguard::Rule::Target::Match:
-  case usbguard::Rule::Target::Device:
-  case usbguard::Rule::Target::Unknown:
+  case Rule::Target::Invalid:
+  case Rule::Target::Empty:
+  case Rule::Target::Match:
+  case Rule::Target::Device:
+  case Rule::Target::Unknown:
   default:
     /* NOOP */
     return;
@@ -328,12 +328,12 @@ void MainWindow::notifyDevicePolicyChanged(const usbguard::Rule& device_rule, qu
   notify(title, notification_icon, device_rule, show_notification);
 }
 
-void MainWindow::notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const usbguard::Rule& device_rule,
+void MainWindow::notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const Rule& device_rule,
   bool show_notification)
 {
   const QString usb_id = QString::fromStdString(device_rule.getDeviceID().toString());
-  const QString name = QString::fromStdString(device_rule.getName());
-  const QString port = QString::fromStdString(device_rule.getViaPort());
+  const QString name = device_rule.getName();
+  const QString port = device_rule.getViaPort();
   const QString message_body = QString::fromLatin1("%1: USB ID=%2; Name=%3; Port=%4")
     .arg(title).arg(usb_id).arg(name).arg(port);
   showMessage(message_body);
@@ -437,7 +437,7 @@ void MainWindow::allowDevice(quint32 id, bool permanent)
 {
   qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
-  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Allow, permanent);
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, Rule::Target::Allow, permanent);
   if (!reply.isValid()) {
     showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
       .arg(QLatin1String("allowDevice"))
@@ -450,7 +450,7 @@ void MainWindow::blockDevice(quint32 id, bool permanent)
 {
   qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
-  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Block, permanent);
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, Rule::Target::Block, permanent);
   if (!reply.isValid()) {
     showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
       .arg(QLatin1String("blockDevice"))
@@ -463,7 +463,7 @@ void MainWindow::rejectDevice(quint32 id, bool permanent)
 {
   qCDebug(LOG) << "id=" << id << " permanent=" << permanent;
 
-  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, usbguard::Rule::Target::Reject, permanent);
+  QDBusPendingReply<uint> reply = _bridge.applyDevicePolicy(id, Rule::Target::Reject, permanent);
   if (!reply.isValid()) {
     showMessage(QString::fromLatin1("D-Bus call failed: %1: %2")
       .arg(QLatin1String("rejectDevice"))
@@ -490,15 +490,15 @@ void MainWindow::handleDBusDisconnect()
   ui->device_view->setDisabled(true);
 }
 
-void MainWindow::handleDeviceInsert(quint32 id, const usbguard::Rule& device_rule)
+void MainWindow::handleDeviceInsert(quint32 id, const Rule& device_rule)
 {
-  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule.toString();
+  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule;
   loadDeviceList();
 }
 
-void MainWindow::handleDeviceRemove(quint32 id, const usbguard::Rule& device_rule)
+void MainWindow::handleDeviceRemove(quint32 id, const Rule& device_rule)
 {
-  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule.toString();
+  qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule;
   ui->device_view->selectionModel()->clearSelection();
   ui->device_view->reset();
   _device_model.removeDevice(id);
@@ -581,7 +581,7 @@ void MainWindow::loadDeviceList()
 
   const DBusRules rules = reply.value();
   for (auto rule : rules) {
-    auto device_rule = usbguard::Rule::fromString(rule.second.toStdString());
+    auto device_rule = Rule::fromString(rule.second);
     device_rule.setRuleID(rule.first);
     if (!_device_model.containsDevice(device_rule.getRuleID())) {
       _device_model.insertDevice(device_rule);
@@ -607,23 +607,23 @@ void MainWindow::commitDeviceListChanges()
     auto target = modified_it.value();
 
     switch (target) {
-    case usbguard::Rule::Target::Allow:
+    case Rule::Target::Allow:
       allowDevice(id, permanent);
       break;
 
-    case usbguard::Rule::Target::Block:
+    case Rule::Target::Block:
       blockDevice(id, permanent);
       break;
 
-    case usbguard::Rule::Target::Reject:
+    case Rule::Target::Reject:
       rejectDevice(id, permanent);
       break;
 
-    case usbguard::Rule::Target::Match:
-    case usbguard::Rule::Target::Invalid:
-    case usbguard::Rule::Target::Empty:
-    case usbguard::Rule::Target::Unknown:
-    case usbguard::Rule::Target::Device:
+    case Rule::Target::Match:
+    case Rule::Target::Invalid:
+    case Rule::Target::Empty:
+    case Rule::Target::Unknown:
+    case Rule::Target::Device:
     default:
       break;
     }

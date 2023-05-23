@@ -20,8 +20,6 @@
 #include "TargetDelegate.h"
 #include "DeviceModel.h"
 
-#include <Rule.hpp>
-
 #include <QComboBox>
 #include <QCoreApplication>
 
@@ -37,9 +35,9 @@ QWidget* TargetDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
   QComboBox* editor = new QComboBox(parent);
   editor->setFrame(false);
   editor->setAutoFillBackground(true);
-  editor->addItem(QCoreApplication::translate("DeviceModel", "Allow"), QVariant::fromValue(usbguard::Rule::Target::Allow));
-  editor->addItem(QCoreApplication::translate("DeviceModel", "Block"), QVariant::fromValue(usbguard::Rule::Target::Block));
-  editor->addItem(QCoreApplication::translate("DeviceModel", "Reject"), QVariant::fromValue(usbguard::Rule::Target::Reject));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Allow"), QVariant::fromValue(Rule::Target::Allow));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Block"), QVariant::fromValue(Rule::Target::Block));
+  editor->addItem(QCoreApplication::translate("DeviceModel", "Reject"), QVariant::fromValue(Rule::Target::Reject));
   return editor;
 }
 
@@ -47,7 +45,7 @@ void TargetDelegate::setEditorData(QWidget* editor, const QModelIndex& index) co
 {
   QComboBox* combobox = static_cast<QComboBox*>(editor);
   DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
-  const usbguard::Rule::Target value = item->getRequestedTarget();
+  const Rule::Target value = item->getRequestedTarget();
   const int value_index = combobox->findData(QVariant::fromValue(value));
 
   if (value_index != -1) {
@@ -58,8 +56,8 @@ void TargetDelegate::setEditorData(QWidget* editor, const QModelIndex& index) co
 void TargetDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
   QComboBox* combobox = static_cast<QComboBox*>(editor);
-  const usbguard::Rule::Target target = combobox->itemData(
-        combobox->currentIndex()).value<usbguard::Rule::Target>();
+  const Rule::Target target = combobox->itemData(
+        combobox->currentIndex()).value<Rule::Target>();
   DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
   static_cast<DeviceModel*>(model)->updateRequestedTarget(item, target);
 }

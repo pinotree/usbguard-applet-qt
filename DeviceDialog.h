@@ -18,8 +18,9 @@
 //
 #pragma once
 
+#include "LibUsbguard.h"
+
 #include <USB.hpp>
-#include <Rule.hpp>
 
 #include <QDialog>
 #include <QTimer>
@@ -47,7 +48,7 @@ public:
   void setDeviceID(const QString& vendor_id, const QString& product_id);
   void setInterfaceTypes(const std::vector<usbguard::USBInterfaceType>& interfaces);
 
-  void setDefaultDecision(usbguard::Rule::Target target);
+  void setDefaultDecision(Rule::Target target);
   void setDefaultDecisionTimeout(quint32 seconds);
   void setDecisionMethod(DecisionMethod method);
   void setDecisionIsPermanent(bool state);
@@ -77,7 +78,7 @@ private Q_SLOTS:
 
 private:
   Ui::DeviceDialog* ui;
-  usbguard::Rule::Target _default_decision;
+  Rule::Target _default_decision;
   quint32 _default_decision_timeout;
   DecisionMethod _decision_method;
   bool _reject_enabled;

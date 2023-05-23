@@ -18,7 +18,7 @@
 //
 #pragma once
 
-#include <Rule.hpp>
+#include "LibUsbguard.h"
 
 #include <QAbstractItemModel>
 #include <QList>
@@ -29,7 +29,7 @@ class DeviceModelItem
 {
 public:
   DeviceModelItem();
-  explicit DeviceModelItem(const usbguard::Rule& device_rule, DeviceModelItem* parent);
+  explicit DeviceModelItem(const Rule& device_rule, DeviceModelItem* parent);
   ~DeviceModelItem();
 
   void appendChild(DeviceModelItem* child);
@@ -45,17 +45,17 @@ public:
   QString getDeviceHash() const;
   quint32 getDeviceID() const;
 
-  usbguard::Rule::Target getRequestedTarget() const;
-  usbguard::Rule::Target getDeviceTarget() const;
+  Rule::Target getRequestedTarget() const;
+  Rule::Target getDeviceTarget() const;
 
-  void setRequestedTarget(usbguard::Rule::Target target);
-  void setDeviceTarget(usbguard::Rule::Target target);
+  void setRequestedTarget(Rule::Target target);
+  void setDeviceTarget(Rule::Target target);
 
 private:
   QList<DeviceModelItem*> _children;
   DeviceModelItem* _parent;
-  usbguard::Rule _device_rule;
-  usbguard::Rule::Target _requested_target;
+  Rule _device_rule;
+  Rule::Target _requested_target;
 };
 
 class DeviceModel : public QAbstractItemModel
@@ -79,16 +79,16 @@ public:
 
   Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-  void insertDevice(const usbguard::Rule& device_rule);
-  void updateDeviceTarget(quint32 device_id, usbguard::Rule::Target target);
-  void updateRequestedTarget(DeviceModelItem* item, usbguard::Rule::Target target);
+  void insertDevice(const Rule& device_rule);
+  void updateDeviceTarget(quint32 device_id, Rule::Target target);
+  void updateRequestedTarget(DeviceModelItem* item, Rule::Target target);
 
   void removeDevice(quint32 device_id);
   void removeDevice(DeviceModelItem* item, bool notify = false);
   bool containsDevice(quint32 device_id) const;
 
   QModelIndex createRowEditIndex(const QModelIndex& index) const;
-  QMap<quint32, usbguard::Rule::Target> getModifiedDevices() const;
+  QMap<quint32, Rule::Target> getModifiedDevices() const;
 
   void clear();
 
@@ -97,7 +97,5 @@ private:
   QMap<uint32_t, DeviceModelItem*> _id_map;
   DeviceModelItem* _root_item;
 };
-
-Q_DECLARE_METATYPE(usbguard::Rule::Target);
 
 /* vim: set ts=2 sw=2 et */

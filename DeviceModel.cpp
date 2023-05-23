@@ -27,10 +27,10 @@
 DeviceModelItem::DeviceModelItem()
 {
   _parent = nullptr;
-  _requested_target = usbguard::Rule::Target::Invalid;
+  _requested_target = Rule::Target::Invalid;
 }
 
-DeviceModelItem::DeviceModelItem(const usbguard::Rule& device_rule, DeviceModelItem* parent)
+DeviceModelItem::DeviceModelItem(const Rule& device_rule, DeviceModelItem* parent)
 {
   _parent = parent;
   _device_rule = device_rule;
@@ -79,35 +79,35 @@ QVariant DeviceModelItem::data(int column)
 
   case 2:
     switch (_requested_target) {
-    case usbguard::Rule::Target::Allow:
+    case Rule::Target::Allow:
       return QCoreApplication::translate("DeviceModel", "Allow");
 
-    case usbguard::Rule::Target::Block:
+    case Rule::Target::Block:
       return QCoreApplication::translate("DeviceModel", "Block");
 
-    case usbguard::Rule::Target::Reject:
+    case Rule::Target::Reject:
       return QCoreApplication::translate("DeviceModel", "Reject");
 
-    case usbguard::Rule::Target::Unknown:
-    case usbguard::Rule::Target::Empty:
-    case usbguard::Rule::Target::Invalid:
-    case usbguard::Rule::Target::Match:
-    case usbguard::Rule::Target::Device:
+    case Rule::Target::Unknown:
+    case Rule::Target::Empty:
+    case Rule::Target::Invalid:
+    case Rule::Target::Match:
+    case Rule::Target::Device:
     default:
-      return QVariant(QString::fromStdString(usbguard::Rule::targetToString(_requested_target)));
+      return QVariant(Rule::targetToString(_requested_target));
     }
 
   case 3:
     return QVariant(QString::fromStdString(_device_rule.getDeviceID().toString()));
 
   case 4:
-    return QVariant(QString::fromStdString(_device_rule.getName()));
+    return QVariant(_device_rule.getName());
 
   case 5:
-    return QVariant(QString::fromStdString(_device_rule.getSerial()));
+    return QVariant(_device_rule.getSerial());
 
   case 6:
-    return QVariant(QString::fromStdString(_device_rule.getViaPort()));
+    return QVariant(_device_rule.getViaPort());
 
   case 7: {
     QString interface_string;
@@ -140,22 +140,22 @@ DeviceModelItem* DeviceModelItem::parent()
   return _parent;
 }
 
-usbguard::Rule::Target DeviceModelItem::getRequestedTarget() const
+Rule::Target DeviceModelItem::getRequestedTarget() const
 {
   return _requested_target;
 }
 
-usbguard::Rule::Target DeviceModelItem::getDeviceTarget() const
+Rule::Target DeviceModelItem::getDeviceTarget() const
 {
   return _device_rule.getTarget();
 }
 
-void DeviceModelItem::setRequestedTarget(usbguard::Rule::Target target)
+void DeviceModelItem::setRequestedTarget(Rule::Target target)
 {
   _requested_target = target;
 }
 
-void DeviceModelItem::setDeviceTarget(usbguard::Rule::Target target)
+void DeviceModelItem::setDeviceTarget(Rule::Target target)
 {
   _device_rule.setTarget(target);
   _requested_target = target;
@@ -163,7 +163,7 @@ void DeviceModelItem::setDeviceTarget(usbguard::Rule::Target target)
 
 QString DeviceModelItem::getDeviceHash() const
 {
-  return QString::fromStdString(_device_rule.getHash());
+  return _device_rule.getHash();
 }
 
 quint32 DeviceModelItem::getDeviceID() const
@@ -374,12 +374,12 @@ Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
   }
 }
 
-void DeviceModel::insertDevice(const usbguard::Rule& device_rule)
+void DeviceModel::insertDevice(const Rule& device_rule)
 {
-  qCDebug(LOG) << "device_rule=" << device_rule.toString();
+  qCDebug(LOG) << "device_rule=" << device_rule;
   const uint32_t device_id = device_rule.getRuleID();
-  const QString device_hash = QString::fromStdString(device_rule.getHash());
-  const QString parent_hash = QString::fromStdString(device_rule.getParentHash());
+  const QString device_hash = device_rule.getHash();
+  const QString parent_hash = device_rule.getParentHash();
   DeviceModelItem* parent_item = _hash_map.value(parent_hash, _root_item);
   DeviceModelItem* child_item = new DeviceModelItem(device_rule, parent_item);
   layoutAboutToBeChanged();
@@ -392,10 +392,10 @@ void DeviceModel::insertDevice(const usbguard::Rule& device_rule)
   layoutChanged();
 }
 
-void DeviceModel::updateDeviceTarget(quint32 device_id, usbguard::Rule::Target target)
+void DeviceModel::updateDeviceTarget(quint32 device_id, Rule::Target target)
 {
   qCDebug(LOG) << "device_id=" << device_id
-    << " target=" << usbguard::Rule::targetToString(target);
+    << " target=" << target;
   DeviceModelItem* item = _id_map.value(device_id, nullptr);
 
   if (item == nullptr) {
@@ -410,10 +410,10 @@ void DeviceModel::updateDeviceTarget(quint32 device_id, usbguard::Rule::Target t
   }
 }
 
-void DeviceModel::updateRequestedTarget(DeviceModelItem* item, usbguard::Rule::Target target)
+void DeviceModel::updateRequestedTarget(DeviceModelItem* item, Rule::Target target)
 {
   qCDebug(LOG) << "item=" << item
-    << " target=" << usbguard::Rule::targetToString(target);
+    << " target=" << target;
 
   if (item->getRequestedTarget() != target) {
     item->setRequestedTarget(target);
@@ -476,9 +476,9 @@ QModelIndex DeviceModel::createRowEditIndex(const QModelIndex& index) const
   return createIndex(index.row(), 2, index.internalPointer());
 }
 
-QMap<quint32, usbguard::Rule::Target> DeviceModel::getModifiedDevices() const
+QMap<quint32, Rule::Target> DeviceModel::getModifiedDevices() const
 {
-  QMap<quint32, usbguard::Rule::Target> modified_map;
+  QMap<quint32, Rule::Target> modified_map;
 
   for (auto item : _id_map) {
     if (item->getDeviceTarget() != item->getRequestedTarget()) {

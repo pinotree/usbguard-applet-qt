@@ -39,6 +39,7 @@ set(applet_SOURCES
   DBusBridge.cpp
   DeviceDialog.cpp
   DeviceModel.cpp
+  LibUsbguard.cpp
   Log.cpp
   MainWindow.cpp
   TargetDelegate.cpp

@@ -45,26 +45,26 @@ protected Q_SLOTS:
   void flashStep();
   void dbusTryConnect();
 
-  void showDeviceDialog(quint32 id, const usbguard::Rule& device_rule);
+  void showDeviceDialog(quint32 id, const Rule& device_rule);
   void showMessage(const QString& message, bool alert = false, bool statusbar = false);
   void showNotification(QSystemTrayIcon::MessageIcon icon, const QString& title, const QString& message);
 
   void handleDevicePresenceChange(uint id,
     usbguard::DeviceManager::EventType event,
-    usbguard::Rule::Target target,
+    Rule::Target target,
     const QString& device_rule);
 
   void handleDevicePolicyChange(uint id,
-    usbguard::Rule::Target target_old,
-    usbguard::Rule::Target target_new,
+    Rule::Target target_old,
+    Rule::Target target_new,
     const QString& device_rule,
     uint rule_id);
 
   void notifyDBusConnected();
   void notifyDBusDisconnected();
-  void notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event, const usbguard::Rule& device_rule);
-  void notifyDevicePolicyChanged(const usbguard::Rule& device_rule, quint32 rule_id);
-  void notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const usbguard::Rule& device_rule, bool show_notification);
+  void notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event, const Rule& device_rule);
+  void notifyDevicePolicyChanged(const Rule& device_rule, quint32 rule_id);
+  void notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const Rule& device_rule, bool show_notification);
 
   void allowDevice(quint32 id, bool permanent);
   void blockDevice(quint32 id, bool permanent);
@@ -73,8 +73,8 @@ protected Q_SLOTS:
   void handleDBusConnect();
   void handleDBusDisconnect();
 
-  void handleDeviceInsert(quint32 id, const usbguard::Rule& device_rule);
-  void handleDeviceRemove(quint32 id, const usbguard::Rule& device_rule);
+  void handleDeviceInsert(quint32 id, const Rule& device_rule);
+  void handleDeviceRemove(quint32 id, const Rule& device_rule);
 
   void loadSettings();
   void saveSettings();

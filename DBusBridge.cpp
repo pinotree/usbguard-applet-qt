@@ -88,7 +88,7 @@ QDBusPendingReply<DBusRules> DBusBridge::listDevices(const QString& query)
   return reply;
 }
 
-QDBusPendingReply<uint> DBusBridge::applyDevicePolicy(uint id, usbguard::Rule::Target target, bool permanent)
+QDBusPendingReply<uint> DBusBridge::applyDevicePolicy(uint id, Rule::Target target, bool permanent)
 {
   QDBusPendingReply<uint> reply = _devices_interface->applyDevicePolicy(id, static_cast<uint>(target), permanent);
   reply.waitForFinished();
@@ -126,15 +126,15 @@ void DBusBridge::dbusServiceRegistered()
 
 void DBusBridge::dbusDevicePolicyApplied(uint id, uint target_new, const QString& device_rule, uint rule_id, DBusAttributes attributes)
 {
-  Q_EMIT devicePolicyApplied(id, static_cast<usbguard::Rule::Target>(target_new), device_rule, rule_id);
+  Q_EMIT devicePolicyApplied(id, static_cast<Rule::Target>(target_new), device_rule, rule_id);
 }
 
 void DBusBridge::dbusDevicePolicyChanged(uint id, uint target_old, uint target_new, const QString& device_rule, uint rule_id, DBusAttributes attributes)
 {
-  Q_EMIT devicePolicyChanged(id, static_cast<usbguard::Rule::Target>(target_old), static_cast<usbguard::Rule::Target>(target_new), device_rule, rule_id);
+  Q_EMIT devicePolicyChanged(id, static_cast<Rule::Target>(target_old), static_cast<Rule::Target>(target_new), device_rule, rule_id);
 }
 
 void DBusBridge::dbusDevicePresenceChanged(uint id, uint event, uint target, const QString& device_rule, DBusAttributes attributes)
 {
-  Q_EMIT devicePresenceChanged(id, static_cast<usbguard::DeviceManager::EventType>(event), static_cast<usbguard::Rule::Target>(target), device_rule);
+  Q_EMIT devicePresenceChanged(id, static_cast<usbguard::DeviceManager::EventType>(event), static_cast<Rule::Target>(target), device_rule);
 }

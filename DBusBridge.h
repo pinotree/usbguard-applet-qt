@@ -19,6 +19,7 @@
 #pragma once
 
 #include "DBusTypes.h"
+#include "LibUsbguard.h"
 
 #include <QDBusPendingReply>
 #include <QDBusReply>
@@ -42,14 +43,14 @@ public:
   bool isConnected() const;
 
   QDBusPendingReply<DBusRules> listDevices(const QString& query);
-  QDBusPendingReply<uint> applyDevicePolicy(uint id, usbguard::Rule::Target target, bool permanent);
+  QDBusPendingReply<uint> applyDevicePolicy(uint id, Rule::Target target, bool permanent);
 
 Q_SIGNALS:
   void serviceAvailable();
   void serviceUnavailable();
-  void devicePolicyApplied(uint id, usbguard::Rule::Target target_new, const QString& device_rule, uint rule_id);
-  void devicePolicyChanged(uint id, usbguard::Rule::Target target_old, usbguard::Rule::Target target_new, const QString& device_rule, uint rule_id);
-  void devicePresenceChanged(uint id, usbguard::DeviceManager::EventType event, usbguard::Rule::Target target, const QString& device_rule);
+  void devicePolicyApplied(uint id, Rule::Target target_new, const QString& device_rule, uint rule_id);
+  void devicePolicyChanged(uint id, Rule::Target target_old, Rule::Target target_new, const QString& device_rule, uint rule_id);
+  void devicePresenceChanged(uint id, usbguard::DeviceManager::EventType event, Rule::Target target, const QString& device_rule);
 
 private Q_SLOTS:
   void createInterfaces();
