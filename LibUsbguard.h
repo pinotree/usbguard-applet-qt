@@ -72,6 +72,18 @@ private:
   friend QDebug& operator<<(QDebug& out, const Rule& rule);
 };
 
+class DeviceManager
+{
+public:
+  // MUST match usbguard::DeviceManager::EventType
+  enum class EventType {
+    Present = 0,
+    Insert = 1,
+    Update = 2,
+    Remove = 3,
+  };
+};
+
 QDebug& operator<<(QDebug& out, const Rule& rule);
 QDebug& operator<<(QDebug& out, const Rule::Target& target);
 

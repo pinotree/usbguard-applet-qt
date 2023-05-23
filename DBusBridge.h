@@ -50,7 +50,7 @@ Q_SIGNALS:
   void serviceUnavailable();
   void devicePolicyApplied(uint id, Rule::Target target_new, const QString& device_rule, uint rule_id);
   void devicePolicyChanged(uint id, Rule::Target target_old, Rule::Target target_new, const QString& device_rule, uint rule_id);
-  void devicePresenceChanged(uint id, usbguard::DeviceManager::EventType event, Rule::Target target, const QString& device_rule);
+  void devicePresenceChanged(uint id, DeviceManager::EventType event, Rule::Target target, const QString& device_rule);
 
 private Q_SLOTS:
   void createInterfaces();

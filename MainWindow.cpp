@@ -66,10 +66,10 @@ MainWindow::MainWindow(QWidget* parent) :
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowState(Qt::WindowMinimized);
   setupSystemTray();
-  qRegisterMetaType<usbguard::DeviceManager::EventType>("usbguard::DeviceManager::EventType");
+  qRegisterMetaType<DeviceManager::EventType>("DeviceManager::EventType");
   qRegisterMetaType<Rule::Target>("Rule::Target");
-  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, usbguard::DeviceManager::EventType, Rule::Target, const QString &)),
-    this, SLOT(handleDevicePresenceChange(uint, usbguard::DeviceManager::EventType, Rule::Target, const QString&)));
+  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, DeviceManager::EventType, Rule::Target, const QString &)),
+    this, SLOT(handleDevicePresenceChange(uint, DeviceManager::EventType, Rule::Target, const QString&)));
   QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, Rule::Target, Rule::Target, const QString&, uint)),
     this, SLOT(handleDevicePolicyChange(uint, Rule::Target, Rule::Target, const QString&, uint)));
   QObject::connect(&_bridge, SIGNAL(serviceAvailable()),
@@ -204,7 +204,7 @@ void MainWindow::showMessage(const QString& message, bool alert, bool statusbar)
 }
 
 void MainWindow::handleDevicePresenceChange(uint id,
-  usbguard::DeviceManager::EventType event,
+  DeviceManager::EventType event,
   Rule::Target target,
   const QString& device_rule_string)
 {
@@ -212,16 +212,16 @@ void MainWindow::handleDevicePresenceChange(uint id,
   auto device_rule = Rule::fromString(device_rule_string);
 
   switch (event) {
-  case usbguard::DeviceManager::EventType::Insert:
+  case DeviceManager::EventType::Insert:
     handleDeviceInsert(id, device_rule);
     break;
 
-  case usbguard::DeviceManager::EventType::Remove:
+  case DeviceManager::EventType::Remove:
     handleDeviceRemove(id, device_rule);
     break;
 
-  case usbguard::DeviceManager::EventType::Present:
-  case usbguard::DeviceManager::EventType::Update:
+  case DeviceManager::EventType::Present:
+  case DeviceManager::EventType::Update:
   default:
     /* NOOP */
     break;
@@ -248,7 +248,7 @@ void MainWindow::handleDevicePolicyChange(uint id,
   }
 }
 
-void MainWindow::notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event,
+void MainWindow::notifyDevicePresenceChanged(DeviceManager::EventType event,
   const Rule& device_rule)
 {
   QString title;
@@ -257,21 +257,21 @@ void MainWindow::notifyDevicePresenceChanged(usbguard::DeviceManager::EventType 
     QSystemTrayIcon::Information;
 
   switch (event) {
-  case usbguard::DeviceManager::EventType::Insert:
+  case DeviceManager::EventType::Insert:
     title = tr("USB Device Inserted");
     show_notification = ui->notify_inserted->isChecked();
     break;
 
-  case usbguard::DeviceManager::EventType::Update:
+  case DeviceManager::EventType::Update:
     title = tr("USB Device Updated");
     break;
 
-  case usbguard::DeviceManager::EventType::Remove:
+  case DeviceManager::EventType::Remove:
     title = tr("USB Device Removed");
     show_notification = ui->notify_removed->isChecked();
     break;
 
-  case usbguard::DeviceManager::EventType::Present:
+  case DeviceManager::EventType::Present:
     title = tr("USB Device Present");
     show_notification = ui->notify_present->isChecked();
     break;

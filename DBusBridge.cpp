@@ -136,5 +136,5 @@ void DBusBridge::dbusDevicePolicyChanged(uint id, uint target_old, uint target_n
 
 void DBusBridge::dbusDevicePresenceChanged(uint id, uint event, uint target, const QString& device_rule, DBusAttributes attributes)
 {
-  Q_EMIT devicePresenceChanged(id, static_cast<usbguard::DeviceManager::EventType>(event), static_cast<Rule::Target>(target), device_rule);
+  Q_EMIT devicePresenceChanged(id, static_cast<DeviceManager::EventType>(event), static_cast<Rule::Target>(target), device_rule);
 }

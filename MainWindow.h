@@ -50,7 +50,7 @@ protected Q_SLOTS:
   void showNotification(QSystemTrayIcon::MessageIcon icon, const QString& title, const QString& message);
 
   void handleDevicePresenceChange(uint id,
-    usbguard::DeviceManager::EventType event,
+    DeviceManager::EventType event,
     Rule::Target target,
     const QString& device_rule);
 
@@ -62,7 +62,7 @@ protected Q_SLOTS:
 
   void notifyDBusConnected();
   void notifyDBusDisconnected();
-  void notifyDevicePresenceChanged(usbguard::DeviceManager::EventType event, const Rule& device_rule);
+  void notifyDevicePresenceChanged(DeviceManager::EventType event, const Rule& device_rule);
   void notifyDevicePolicyChanged(const Rule& device_rule, quint32 rule_id);
   void notify(const QString& title, QSystemTrayIcon::MessageIcon icon, const Rule& device_rule, bool show_notification);
 
