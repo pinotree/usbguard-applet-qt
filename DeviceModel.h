@@ -98,4 +98,6 @@ private:
   DeviceModelItem* _root_item;
 };
 
+Q_DECLARE_METATYPE(usbguard::Rule::Target);
+
 /* vim: set ts=2 sw=2 et */
