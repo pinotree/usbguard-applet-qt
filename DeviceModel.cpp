@@ -382,14 +382,12 @@ void DeviceModel::insertDevice(const Rule& device_rule)
   const QString parent_hash = device_rule.getParentHash();
   DeviceModelItem* parent_item = _hash_map.value(parent_hash, _root_item);
   DeviceModelItem* child_item = new DeviceModelItem(device_rule, parent_item);
-  layoutAboutToBeChanged();
   beginInsertRows(createIndex(parent_item->row(), 0, parent_item),
     parent_item->childCount(), parent_item->childCount());
   parent_item->appendChild(child_item);
   _hash_map.insert(device_hash, child_item);
   _id_map.insert(device_id, child_item);
   endInsertRows();
-  layoutChanged();
 }
 
 void DeviceModel::updateDeviceTarget(quint32 device_id, Rule::Target target)
@@ -446,7 +444,6 @@ void DeviceModel::removeDevice(DeviceModelItem* item, bool notify)
   }
 
   if (notify) {
-    layoutAboutToBeChanged();
     beginRemoveRows(createIndex(parent_item->row(), 0, parent_item), item->row(), item->row());
   }
 
@@ -461,7 +458,6 @@ void DeviceModel::removeDevice(DeviceModelItem* item, bool notify)
 
   if (notify) {
     endRemoveRows();
-    layoutChanged();
   }
 }
 
