@@ -499,8 +499,6 @@ void MainWindow::handleDeviceInsert(quint32 id, const Rule& device_rule)
 void MainWindow::handleDeviceRemove(quint32 id, const Rule& device_rule)
 {
   qCDebug(LOG) << "id=" << id << " device_rule=" << device_rule;
-  ui->device_view->selectionModel()->clearSelection();
-  ui->device_view->reset();
   _device_model.removeDevice(id);
   ui->device_view->expandAll();
 }
@@ -634,8 +632,6 @@ void MainWindow::commitDeviceListChanges()
 
 void MainWindow::clearDeviceList()
 {
-  ui->device_view->clearSelection();
-  ui->device_view->reset();
   _device_model.clear();
 }
 
