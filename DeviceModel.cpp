@@ -432,7 +432,7 @@ void DeviceModel::removeDevice(quint32 device_id)
     return;
   }
   else {
-    removeDevice(item);
+    removeDevice(item, /*notify=*/true);
   }
 }
 
@@ -451,19 +451,18 @@ void DeviceModel::removeDevice(DeviceModelItem* item, bool notify)
   }
 
   while (item->childCount() > 0) {
-    removeDevice(item->child(0), notify);
+    removeDevice(item->child(0), /*notify=*/false);
   }
 
   _hash_map.remove(item->getDeviceHash());
   _id_map.remove(item->getDeviceID());
+  parent_item->removeChild(item);
+  delete item;
 
   if (notify) {
     endRemoveRows();
     layoutChanged();
   }
-
-  parent_item->removeChild(item);
-  delete item;
 }
 
 bool DeviceModel::containsDevice(quint32 device_id) const
