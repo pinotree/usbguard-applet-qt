@@ -579,9 +579,10 @@ void MainWindow::loadDeviceList()
 
   const DBusRules rules = reply.value();
   for (auto rule : rules) {
-    auto device_rule = Rule::fromString(rule.second);
-    device_rule.setRuleID(rule.first);
-    if (!_device_model.containsDevice(device_rule.getRuleID())) {
+    const auto device_rule_id = rule.first;
+    if (!_device_model.containsDevice(device_rule_id)) {
+      auto device_rule = Rule::fromString(rule.second);
+      device_rule.setRuleID(device_rule_id);
       _device_model.insertDevice(device_rule);
     }
   }
