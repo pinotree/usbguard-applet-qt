@@ -20,9 +20,3 @@
 #include "Log.h"
 
 Q_LOGGING_CATEGORY(LOG, "usbguard.applet-qt", QtWarningMsg)
-
-QDebug& operator<<(QDebug& out, const std::string& str)
-{
-  out << QString::fromStdString(str);
-  return out;
-}

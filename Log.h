@@ -20,8 +20,4 @@
 
 #include <QLoggingCategory>
 
-#include <string>
-
 Q_DECLARE_LOGGING_CATEGORY(LOG)
-
-QDebug& operator<<(QDebug& out, const std::string& str);
