@@ -17,8 +17,6 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 
 #include "MainWindow.h"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-default"
 #include <ui_MainWindow.h>
 #include "DeviceDialog.h"
 #include "DBusBridge.h"
@@ -40,7 +38,6 @@
 #include <QTreeView>
 #include <QShortcut>
 #include <QWindowStateChangeEvent>
-#pragma GCC diagnostic pop
 
 MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
