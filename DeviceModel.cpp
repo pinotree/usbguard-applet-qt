@@ -358,6 +358,9 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
   case Qt::DisplayRole:
     return item->data(index.column());
 
+  case RuleTarget:
+    return QVariant::fromValue(item->getDeviceTarget());
+
   default:
     return QVariant();
   }
@@ -374,6 +377,35 @@ Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
   }
   else {
     return QAbstractItemModel::flags(index);
+  }
+}
+
+bool DeviceModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+  if (!index.isValid()) {
+    return false;
+  }
+
+  DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
+
+  switch (role) {
+  case RuleTarget: {
+    const Rule::Target target = value.value<Rule::Target>();
+    qCDebug(LOG) << "item=" << item << " target=" << target;
+
+    if (item->getRequestedTarget() != target) {
+      item->setRequestedTarget(target);
+      Q_EMIT dataChanged(createIndex(item->row(), 0, item),
+        createIndex(item->row(), item->columnCount() - 1, item),
+        QVector<int>() << Qt::DisplayRole);
+      return true;
+    }
+
+    return false;
+  }
+
+  default:
+    return false;
   }
 }
 
