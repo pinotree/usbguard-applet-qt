@@ -44,9 +44,7 @@ QWidget* TargetDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
 void TargetDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
   QComboBox* combobox = static_cast<QComboBox*>(editor);
-  DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
-  const Rule::Target value = item->getRequestedTarget();
-  const int value_index = combobox->findData(QVariant::fromValue(value));
+  const int value_index = combobox->findData(index.data(DeviceModel::RuleTarget));
 
   if (value_index != -1) {
     combobox->setCurrentIndex(value_index);
@@ -56,10 +54,7 @@ void TargetDelegate::setEditorData(QWidget* editor, const QModelIndex& index) co
 void TargetDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
   QComboBox* combobox = static_cast<QComboBox*>(editor);
-  const Rule::Target target = combobox->itemData(
-        combobox->currentIndex()).value<Rule::Target>();
-  DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
-  static_cast<DeviceModel*>(model)->updateRequestedTarget(item, target);
+  model->setData(index, combobox->itemData(combobox->currentIndex()), DeviceModel::RuleTarget);
 }
 
 void TargetDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
