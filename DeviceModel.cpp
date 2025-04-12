@@ -213,7 +213,6 @@ DeviceModel::DeviceModel(QObject* parent)
 
 DeviceModel::~DeviceModel()
 {
-  clear();
   delete _root_item;
 }
 
