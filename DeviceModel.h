@@ -87,7 +87,6 @@ public:
 
   void insertDevice(const Rule& device_rule);
   void updateDeviceTarget(quint32 device_id, Rule::Target target);
-  void updateRequestedTarget(DeviceModelItem* item, Rule::Target target);
 
   void removeDevice(quint32 device_id);
   void removeDevice(DeviceModelItem* item, bool notify = false);

@@ -443,19 +443,6 @@ void DeviceModel::updateDeviceTarget(quint32 device_id, Rule::Target target)
   }
 }
 
-void DeviceModel::updateRequestedTarget(DeviceModelItem* item, Rule::Target target)
-{
-  qCDebug(LOG) << "item=" << item
-    << " target=" << target;
-
-  if (item->getRequestedTarget() != target) {
-    item->setRequestedTarget(target);
-    Q_EMIT dataChanged(createIndex(item->row(), 0, item),
-      createIndex(item->row(), item->columnCount() - 1, item),
-      QVector<int>() << Qt::DisplayRole);
-  }
-}
-
 void DeviceModel::removeDevice(quint32 device_id)
 {
   qCDebug(LOG) << "device_id=" << device_id;
