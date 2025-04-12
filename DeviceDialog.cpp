@@ -60,7 +60,7 @@ void DeviceDialog::setSerial(const QString& serial)
   _serial = serial;
 
   if (_mask_serial_number) {
-    for (auto i = _serial.size(), p = 1; i > 0; --i, ++p) {
+    for (int i = _serial.size(), p = 1; i > 0; --i, ++p) {
       if ((p % 2) == 0) {
         _serial[i - 1] = QLatin1Char('*');
       }
