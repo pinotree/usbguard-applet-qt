@@ -21,8 +21,42 @@
 #include "Log.h"
 
 #include <iostream>
+#include <QList>
 #include <QVector>
 #include <QCoreApplication>
+
+class DeviceModelItem
+{
+public:
+  DeviceModelItem();
+  explicit DeviceModelItem(const Rule& device_rule, DeviceModelItem* parent);
+  ~DeviceModelItem();
+
+  void appendChild(DeviceModelItem* child);
+  void removeChild(DeviceModelItem* child);
+
+  DeviceModelItem* child(int row);
+  int childCount() const;
+  int columnCount() const;
+  QVariant data(int column);
+  int row() const;
+  DeviceModelItem* parent();
+
+  QString getDeviceHash() const;
+  quint32 getDeviceID() const;
+
+  Rule::Target getRequestedTarget() const;
+  Rule::Target getDeviceTarget() const;
+
+  void setRequestedTarget(Rule::Target target);
+  void setDeviceTarget(Rule::Target target);
+
+private:
+  QList<DeviceModelItem*> _children;
+  DeviceModelItem* _parent;
+  Rule _device_rule;
+  Rule::Target _requested_target;
+};
 
 DeviceModelItem::DeviceModelItem()
 {
