@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.10)
 project(usbguard-applet-qt)
 
 find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus LinguistTools)
