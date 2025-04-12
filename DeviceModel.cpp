@@ -544,9 +544,10 @@ void DeviceModel::clear()
   qCDebug(LOG);
   beginResetModel();
 
-  while (_root_item->childCount() > 0) {
-    removeDevice(_root_item->child(0), /*notify=*/false);
-  }
+  _hash_map.clear();
+  _id_map.clear();
+  delete _root_item;
+  _root_item = new DeviceModelItem();
 
   endResetModel();
 }
