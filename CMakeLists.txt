@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(usbguard-applet-qt)
 
-find_package(Qt5 5.10 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus LinguistTools)
+find_package(Qt6 6.0 CONFIG REQUIRED COMPONENTS Core Gui Widgets DBus LinguistTools)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(USBGUARD REQUIRED IMPORTED_TARGET libusbguard)
 
@@ -19,7 +19,7 @@ add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
 add_definitions(-DQT_STRICT_ITERATORS)
 add_definitions(-DQT_NO_URL_CAST_FROM_STRING)
 add_definitions(-DQT_DEPRECATED_WARNINGS)
-add_definitions(-DQT_DISABLE_DEPRECATED_UP_TO=0x050A00)
+add_definitions(-DQT_DISABLE_DEPRECATED_UP_TO=0x060000)
 add_definitions(-DQT_NO_KEYWORDS)
 add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
 add_definitions(-DQT_NO_CAST_TO_ASCII)
@@ -28,7 +28,7 @@ add_definitions(-DQT_NO_CAST_FROM_ASCII)
 file(GLOB ts_files
   "translations/*.ts"
 )
-qt5_add_translation(qm_files ${ts_files})
+qt6_add_translation(qm_files ${ts_files})
 add_custom_command(
   OUTPUT translations.qrc
   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/translations/generate_translations_qrc.sh" translations.qrc ${qm_files}
@@ -54,7 +54,7 @@ set(applet_RESOURCES
   "${CMAKE_BINARY_DIR}/translations.qrc"
 )
 set_source_files_properties(org.usbguard1.xml PROPERTIES INCLUDE DBusTypes.h)
-qt5_add_dbus_interface(applet_SOURCES
+qt6_add_dbus_interface(applet_SOURCES
   org.usbguard1.xml
   OrgUsbguardInterface
 )
@@ -66,10 +66,10 @@ add_executable(usbguard-applet-qt
 )
 
 target_link_libraries(usbguard-applet-qt
-  Qt5::Core
-  Qt5::Gui
-  Qt5::Widgets
-  Qt5::DBus
+  Qt6::Core
+  Qt6::Gui
+  Qt6::Widgets
+  Qt6::DBus
   PkgConfig::USBGUARD
 )
 
