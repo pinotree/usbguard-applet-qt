@@ -352,12 +352,15 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
     return headerData(index.column(), Qt::Horizontal, role);
   }
 
-  if (role != Qt::DisplayRole) {
+  DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
+
+  switch (role) {
+  case Qt::DisplayRole:
+    return item->data(index.column());
+
+  default:
     return QVariant();
   }
-
-  DeviceModelItem* item = static_cast<DeviceModelItem*>(index.internalPointer());
-  return item->data(index.column());
 }
 
 Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
