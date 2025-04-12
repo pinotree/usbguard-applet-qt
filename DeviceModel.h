@@ -89,7 +89,6 @@ public:
   void updateDeviceTarget(quint32 device_id, Rule::Target target);
 
   void removeDevice(quint32 device_id);
-  void removeDevice(DeviceModelItem* item, bool notify = false);
   bool containsDevice(quint32 device_id) const;
 
   QModelIndex createRowEditIndex(const QModelIndex& index) const;
@@ -98,6 +97,8 @@ public:
   void clear();
 
 private:
+  void removeDevice(DeviceModelItem* item, bool notify = false);
+
   QMap<QString, DeviceModelItem*> _hash_map;
   QMap<uint32_t, DeviceModelItem*> _id_map;
   DeviceModelItem* _root_item;
