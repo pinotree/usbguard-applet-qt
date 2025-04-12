@@ -34,7 +34,7 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   setWindowTitle(tr("USB Device Inserted"));
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
-  connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
+  connect(&timer, &QTimer::timeout, this, &DeviceDialog::timerUpdate);
   device_id = id;
   setDecisionMethod(DecisionMethod::Buttons);
   setDefaultDecisionTimeout(23);

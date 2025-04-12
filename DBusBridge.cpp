@@ -47,7 +47,7 @@ DBusBridge::DBusBridge(QObject* parent) :
    */
   _reconnect_timer.setInterval(5000);
   _reconnect_timer.setSingleShot(true);
-  QObject::connect(&_reconnect_timer, SIGNAL(timeout()), this, SLOT(createInterfaces()));
+  QObject::connect(&_reconnect_timer, &QTimer::timeout, this, &DBusBridge::createInterfaces);
 }
 
 DBusBridge::~DBusBridge()
@@ -63,10 +63,10 @@ QDBusReply<bool> DBusBridge::tryConnect()
     _watcher->setConnection(bus);
     _watcher->setWatchMode(QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration);
     _watcher->addWatchedService(service);
-    QObject::connect(_watcher, SIGNAL(serviceRegistered(const QString&)),
-      this, SLOT(dbusServiceRegistered()));
-    QObject::connect(_watcher, SIGNAL(serviceUnregistered(const QString&)),
-      this, SLOT(destroyInterfaces()));
+    QObject::connect(_watcher, &QDBusServiceWatcher::serviceRegistered,
+      this, &DBusBridge::dbusServiceRegistered);
+    QObject::connect(_watcher, &QDBusServiceWatcher::serviceUnregistered,
+      this, &DBusBridge::destroyInterfaces);
   }
 
   QDBusReply<bool> reply = bus.interface()->isServiceRegistered(service);
@@ -100,12 +100,12 @@ void DBusBridge::createInterfaces()
   QDBusConnection bus = QDBusConnection::systemBus();
 
   _devices_interface = new OrgUsbguardDevices1Interface(service, QLatin1String("/org/usbguard1/Devices"), bus, this);
-  QObject::connect(_devices_interface, SIGNAL(DevicePolicyApplied(uint, uint, const QString&, uint, DBusAttributes)),
-    this, SLOT(dbusDevicePolicyApplied(uint, uint, const QString&, uint, DBusAttributes)));
-  QObject::connect(_devices_interface, SIGNAL(DevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)),
-    this, SLOT(dbusDevicePolicyChanged(uint, uint, uint, const QString&, uint, DBusAttributes)));
-  QObject::connect(_devices_interface, SIGNAL(DevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)),
-    this, SLOT(dbusDevicePresenceChanged(uint, uint, uint, const QString&, DBusAttributes)));
+  QObject::connect(_devices_interface, &OrgUsbguardDevices1Interface::DevicePolicyApplied,
+    this, &DBusBridge::dbusDevicePolicyApplied);
+  QObject::connect(_devices_interface, &OrgUsbguardDevices1Interface::DevicePolicyChanged,
+    this, &DBusBridge::dbusDevicePolicyChanged);
+  QObject::connect(_devices_interface, &OrgUsbguardDevices1Interface::DevicePresenceChanged,
+    this, &DBusBridge::dbusDevicePresenceChanged);
 
   Q_EMIT serviceAvailable();
 }

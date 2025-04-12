@@ -54,28 +54,28 @@ MainWindow::MainWindow(QWidget* parent) :
   ui->device_view->setItemDelegateForColumn(2, &_target_delegate);
   ui->device_view->resizeColumnToContents(1);
   ui->device_view->setItemsExpandable(false);
-  QObject::connect(ui->device_view->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-    this, SLOT(editDeviceListRow(QModelIndex)));
-  QObject::connect(ui->device_view, SIGNAL(clicked(QModelIndex)),
-    this, SLOT(editDeviceListRow(QModelIndex)));
-  QObject::connect(ui->apply_button, SIGNAL(pressed()),
-    this, SLOT(commitDeviceListChanges()));
-  QObject::connect(ui->reset_button, SIGNAL(pressed()),
-    this, SLOT(resetDeviceList()));
+  QObject::connect(ui->device_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
+    this, &MainWindow::editDeviceListRow);
+  QObject::connect(ui->device_view, &QTreeView::clicked,
+    this, &MainWindow::editDeviceListRow);
+  QObject::connect(ui->apply_button, &QPushButton::pressed,
+    this, &MainWindow::commitDeviceListChanges);
+  QObject::connect(ui->reset_button, &QPushButton::pressed,
+    this, &MainWindow::resetDeviceList);
   setWindowTitle(tr("USBGuard"));
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowState(Qt::WindowMinimized);
   setupSystemTray();
   qRegisterMetaType<DeviceManager::EventType>("DeviceManager::EventType");
   qRegisterMetaType<Rule::Target>("Rule::Target");
-  QObject::connect(&_bridge, SIGNAL(devicePresenceChanged(uint, DeviceManager::EventType, Rule::Target, const QString &)),
-    this, SLOT(handleDevicePresenceChange(uint, DeviceManager::EventType, Rule::Target, const QString&)));
-  QObject::connect(&_bridge, SIGNAL(devicePolicyChanged(uint, Rule::Target, Rule::Target, const QString&, uint)),
-    this, SLOT(handleDevicePolicyChange(uint, Rule::Target, Rule::Target, const QString&, uint)));
-  QObject::connect(&_bridge, SIGNAL(serviceAvailable()),
-    this, SLOT(handleDBusConnect()));
-  QObject::connect(&_bridge, SIGNAL(serviceUnavailable()),
-    this, SLOT(handleDBusDisconnect()));
+  QObject::connect(&_bridge, &DBusBridge::devicePresenceChanged,
+    this, &MainWindow::handleDevicePresenceChange);
+  QObject::connect(&_bridge, &DBusBridge::devicePolicyChanged,
+    this, &MainWindow::handleDevicePolicyChange);
+  QObject::connect(&_bridge, &DBusBridge::serviceAvailable,
+    this, &MainWindow::handleDBusConnect);
+  QObject::connect(&_bridge, &DBusBridge::serviceUnavailable,
+    this, &MainWindow::handleDBusDisconnect);
   /*
    * loadSettings has to be called before setupSettingsWatcher! Otherwise it
    * will trigger the slots connected by the setupSettingsWatcher method.
@@ -83,9 +83,9 @@ MainWindow::MainWindow(QWidget* parent) :
   loadSettings();
   setupSettingsWatcher();
   ui->statusBar->showMessage(tr("Inactive. No D-Bus connection."));
-  new QShortcut(QKeySequence(Qt::Key_Escape, Qt::Key_Escape), this, SLOT(showMinimized()));
+  new QShortcut(QKeySequence(Qt::Key_Escape, Qt::Key_Escape), this, this, &MainWindow::showMinimized);
 
-  QTimer::singleShot(1000, this, SLOT(dbusTryConnect()));
+  QTimer::singleShot(1000, this, &MainWindow::dbusTryConnect);
 }
 
 void MainWindow::setupSystemTray()
@@ -96,26 +96,26 @@ void MainWindow::setupSystemTray()
   auto quit_action = new QAction(tr("Quit"), systray);
   menu->addAction(quit_action);
   systray->setContextMenu(menu);
-  QObject::connect(quit_action, SIGNAL(triggered()), qApp, SLOT(quit()));
-  QObject::connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-    this, SLOT(switchVisibilityState(QSystemTrayIcon::ActivationReason)));
-  QObject::connect(&_flash_timer, SIGNAL(timeout()),
-    this, SLOT(flashStep()));
+  QObject::connect(quit_action, &QAction::triggered, qApp, &QApplication::quit);
+  QObject::connect(systray, &QSystemTrayIcon::activated,
+    this, &MainWindow::switchVisibilityState);
+  QObject::connect(&_flash_timer, &QTimer::timeout,
+    this, &MainWindow::flashStep);
   systray->show();
 }
 
 void MainWindow::setupSettingsWatcher()
 {
   for (QCheckBox* checkbox : ui->settings_tab->findChildren<QCheckBox*>()) {
-    QObject::connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(saveSettings()));
+    QObject::connect(checkbox, &QCheckBox::toggled, this, &MainWindow::saveSettings);
   }
 
   for (QComboBox* combobox : ui->settings_tab->findChildren<QComboBox*>()) {
-    QObject::connect(combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(saveSettings()));
+    QObject::connect(combobox, &QComboBox::currentIndexChanged, this, &MainWindow::saveSettings);
   }
 
   for (QSpinBox* spinbox : ui->settings_tab->findChildren<QSpinBox*>()) {
-    QObject::connect(spinbox, SIGNAL(valueChanged(int)), this, SLOT(saveSettings()));
+    QObject::connect(spinbox, &QSpinBox::valueChanged, this, &MainWindow::saveSettings);
   }
 }
 
@@ -178,12 +178,12 @@ void MainWindow::showDeviceDialog(quint32 id, const Rule& device_rule)
   dialog->setInterfaceTypes(device_rule.attributeWithInterface().values());
   dialog->setModal(false);
   dialog->setRandomizePosition(ui->randomize_position_checkbox->isChecked());
-  QObject::connect(dialog, SIGNAL(allowed(quint32, bool)),
-    this, SLOT(allowDevice(quint32, bool)));
-  QObject::connect(dialog, SIGNAL(rejected(quint32, bool)),
-    this, SLOT(rejectDevice(quint32, bool)));
-  QObject::connect(dialog, SIGNAL(blocked(quint32, bool)),
-    this, SLOT(blockDevice(quint32, bool)));
+  QObject::connect(dialog, &DeviceDialog::allowed,
+    this, &MainWindow::allowDevice);
+  QObject::connect(dialog, &DeviceDialog::rejected,
+    this, &MainWindow::rejectDevice);
+  QObject::connect(dialog, &DeviceDialog::blocked,
+    this, &MainWindow::blockDevice);
   dialog->show();
   dialog->raise();
   dialog->activateWindow();
@@ -659,7 +659,7 @@ void MainWindow::changeEvent(QEvent* e)
     if (!(event->oldState() & Qt::WindowMinimized)
       && (windowState() & Qt::WindowMinimized)) {
       qCDebug(LOG) << "Qt::WindowMinimized";
-      QTimer::singleShot(250, this, SLOT(hide()));
+      QTimer::singleShot(250, this, &MainWindow::hide);
     }
   }
 
