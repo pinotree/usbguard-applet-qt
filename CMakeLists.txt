@@ -25,16 +25,6 @@ add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
 add_definitions(-DQT_NO_CAST_TO_ASCII)
 add_definitions(-DQT_NO_CAST_FROM_ASCII)
 
-file(GLOB ts_files
-  "translations/*.ts"
-)
-qt6_add_translation(qm_files ${ts_files})
-add_custom_command(
-  OUTPUT translations.qrc
-  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/translations/generate_translations_qrc.sh" translations.qrc ${qm_files}
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/translations/generate_translations_qrc.sh" ${qm_files}
-)
-
 set(applet_SOURCES
   DBusBridge.cpp
   DeviceDialog.cpp
@@ -51,7 +41,6 @@ set(applet_FORMS
 )
 set(applet_RESOURCES
   resources/icon.qrc
-  "${CMAKE_BINARY_DIR}/translations.qrc"
 )
 set_source_files_properties(org.usbguard1.xml PROPERTIES INCLUDE DBusTypes.h)
 qt6_add_dbus_interface(applet_SOURCES
@@ -71,6 +60,19 @@ target_link_libraries(usbguard-applet-qt
   Qt6::Widgets
   Qt6::DBus
   PkgConfig::USBGUARD
+)
+
+file(GLOB ts_files
+  "translations/*.ts"
+)
+qt6_add_lrelease(
+  TS_FILES ${ts_files}
+  QM_FILES_OUTPUT_VARIABLE qm_files
+)
+qt6_add_resources(usbguard-applet-qt translations
+  PREFIX "/translations"
+  BASE "${CMAKE_CURRENT_BINARY_DIR}"
+  FILES "${qm_files}"
 )
 
 install(TARGETS usbguard-applet-qt
