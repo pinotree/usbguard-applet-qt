@@ -392,7 +392,7 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
     return item->data(index.column());
 
   case RuleTarget:
-    return QVariant::fromValue(item->getDeviceTarget());
+    return QVariant::fromValue(item->getRequestedTarget());
 
   default:
     return QVariant();
