@@ -47,8 +47,8 @@ int main(int argc, char* argv[])
   auto disableSessionManagement = [](QSessionManager &sm) {
     sm.setRestartHint(QSessionManager::RestartNever);
   };
-  QObject::connect(&a, &QGuiApplication::commitDataRequest, disableSessionManagement);
-  QObject::connect(&a, &QGuiApplication::saveStateRequest, disableSessionManagement);
+  QObject::connect(&a, &QGuiApplication::commitDataRequest, &a, disableSessionManagement);
+  QObject::connect(&a, &QGuiApplication::saveStateRequest, &a, disableSessionManagement);
 
   MainWindow w;
   a.setQuitOnLastWindowClosed(false);
