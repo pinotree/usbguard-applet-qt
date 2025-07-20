@@ -1,0 +1,89 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - "debian:12"
+          - "debian:unstable"
+          - "registry.fedoraproject.org/fedora:latest"
+          - "registry.opensuse.org/opensuse/tumbleweed:latest"
+          - "ubuntu:24.04"
+          - "ubuntu:latest"
+    steps:
+      - name: "Install dependencies (Debian/Ubuntu)"
+        if: ${{ contains(matrix.container, 'debian') || contains(matrix.container, 'ubuntu') }}
+        run: |
+          set -eux
+          apt-get update
+          apt-get -y dist-upgrade
+          apt-get --no-install-recommends -y install \
+            git-core \
+            ca-certificates \
+            build-essential \
+            cmake \
+            pkg-config \
+            qt6-base-dev \
+            qt6-tools-dev \
+            libusbguard-dev
+      - name: "Install dependencies (Fedora)"
+        if: ${{ contains(matrix.container, 'fedora') }}
+        run: |
+          set -eux
+          dnf --setopt install_weak_deps=False -y upgrade
+          dnf --setopt install_weak_deps=False -y install \
+            gcc-c++ \
+            git-core \
+            make \
+            cmake \
+            pkgconfig \
+            qt6-qtbase-devel \
+            qt6-qttools-devel \
+            usbguard-devel
+      - name: "Install dependencies (openSUSE)"
+        if: ${{ contains(matrix.container, 'opensuse') }}
+        run: |
+          set -eux
+          zypper update --no-recommends -y
+          zypper install --no-recommends -y \
+            git-core \
+            gcc-c++ \
+            make \
+            cmake \
+            pkg-config \
+            qt6-base-devel \
+            qt6-tools-devel \
+            qt6-linguist-devel \
+            usbguard-devel
+      - uses: actions/checkout@v4
+      - name: "Configure"
+        run: |
+          set -eux
+          cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -B build -S .
+      - name: "Build"
+        run: |
+          set -eux
+          cmake --build build
+      - name: "Install"
+        run: |
+          set -eux
+          DESTDIR=$PWD/install cmake --install build
