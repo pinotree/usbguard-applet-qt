@@ -61,7 +61,7 @@ target_link_libraries(usbguard-applet-qt
 file(GLOB ts_files
   "translations/*.ts"
 )
-qt6_add_lrelease(
+qt6_add_lrelease(usbguard-applet-qt
   TS_FILES ${ts_files}
   QM_FILES_OUTPUT_VARIABLE qm_files
 )
