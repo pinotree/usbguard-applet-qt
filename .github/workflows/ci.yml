@@ -73,7 +73,7 @@ jobs:
             qt6-tools-devel \
             qt6-linguist-devel \
             usbguard-devel
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: "Configure"
         run: |
           set -eux
