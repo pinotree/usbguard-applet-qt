@@ -23,6 +23,7 @@ jobs:
       matrix:
         container:
           - "debian:12"
+          - "debian:13"
           - "debian:unstable"
           - "registry.fedoraproject.org/fedora:latest"
           - "registry.opensuse.org/opensuse/tumbleweed:latest"
