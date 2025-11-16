@@ -58,16 +58,16 @@ private:
   Rule::Target _requested_target;
 };
 
-DeviceModelItem::DeviceModelItem()
+DeviceModelItem::DeviceModelItem() :
+  _requested_target(Rule::Target::Invalid)
 {
-  _requested_target = Rule::Target::Invalid;
 }
 
-DeviceModelItem::DeviceModelItem(const Rule& device_rule, DeviceModelItem* parent)
+DeviceModelItem::DeviceModelItem(const Rule& device_rule, DeviceModelItem* parent) :
+  _parent(parent),
+  _device_rule(device_rule),
+  _requested_target(device_rule.getTarget())
 {
-  _parent = parent;
-  _device_rule = device_rule;
-  _requested_target = device_rule.getTarget();
 }
 
 DeviceModelItem::~DeviceModelItem()
@@ -205,9 +205,9 @@ quint32 DeviceModelItem::getDeviceID() const
 }
 
 DeviceModel::DeviceModel(QObject* parent)
-  : QAbstractItemModel(parent)
+  : QAbstractItemModel(parent),
+  _root_item(new DeviceModelItem())
 {
-  _root_item = new DeviceModelItem();
 }
 
 DeviceModel::~DeviceModel()

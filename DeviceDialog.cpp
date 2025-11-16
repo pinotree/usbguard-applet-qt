@@ -27,7 +27,8 @@
 
 DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   QDialog(parent),
-  ui(new Ui::DeviceDialog)
+  ui(new Ui::DeviceDialog),
+  device_id(id)
 {
   qCDebug(LOG) << "Creating DeviceDialog for device_id=" << id;
   ui->setupUi(this);
@@ -35,7 +36,6 @@ DeviceDialog::DeviceDialog(quint32 id, QWidget* parent) :
   setWindowIcon(QIcon(QLatin1String(":/usbguard-icon.svg")));
   setWindowFlags(Qt::CustomizeWindowHint|Qt::WindowStaysOnTopHint);
   connect(&timer, &QTimer::timeout, this, &DeviceDialog::timerUpdate);
-  device_id = id;
   setDecisionMethod(DecisionMethod::Buttons);
   setDefaultDecisionTimeout(23);
   setRandomizePosition(false);
