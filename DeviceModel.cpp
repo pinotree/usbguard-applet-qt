@@ -53,14 +53,13 @@ public:
 
 private:
   QList<DeviceModelItem*> _children;
-  DeviceModelItem* _parent;
+  DeviceModelItem* _parent = nullptr;
   Rule _device_rule;
   Rule::Target _requested_target;
 };
 
 DeviceModelItem::DeviceModelItem()
 {
-  _parent = nullptr;
   _requested_target = Rule::Target::Invalid;
 }
 

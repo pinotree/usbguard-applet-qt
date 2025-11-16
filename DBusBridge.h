@@ -60,8 +60,8 @@ private Q_SLOTS:
 
 private:
   QTimer _reconnect_timer;
-  QDBusServiceWatcher* _watcher;
-  OrgUsbguardDevices1Interface* _devices_interface;
+  QDBusServiceWatcher* _watcher = nullptr;
+  OrgUsbguardDevices1Interface* _devices_interface = nullptr;
 
   static const QString service;
 };

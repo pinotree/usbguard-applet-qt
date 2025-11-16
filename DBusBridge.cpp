@@ -32,9 +32,7 @@ const QString DBusBridge::service = QLatin1String("org.usbguard1");
 
 DBusBridge::DBusBridge(QObject* parent) :
   QObject(parent),
-  _reconnect_timer(this),
-  _watcher(nullptr),
-  _devices_interface(nullptr)
+  _reconnect_timer(this)
 {
   qDBusRegisterMetaType<DBusRule>();
   qDBusRegisterMetaType<DBusRules>();
