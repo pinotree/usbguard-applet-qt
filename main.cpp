@@ -22,12 +22,12 @@
 
 #include <QApplication>
 #include <QLocale>
-#include <QSessionManager>
 #include <QTranslator>
 #include <QString>
 
 int main(int argc, char* argv[])
 {
+  QCoreApplication::setAttribute(Qt::AA_DisableSessionManager, true);
   QApplication a(argc, argv);
   QTranslator translator;
   qCDebug(LOG) << "Loading translations for locale: "
@@ -43,12 +43,6 @@ int main(int argc, char* argv[])
   else {
     qCDebug(LOG) << "Translations not available for the current locale.";
   }
-
-  auto disableSessionManagement = [](QSessionManager &sm) {
-    sm.setRestartHint(QSessionManager::RestartNever);
-  };
-  QObject::connect(&a, &QGuiApplication::commitDataRequest, &a, disableSessionManagement);
-  QObject::connect(&a, &QGuiApplication::saveStateRequest, &a, disableSessionManagement);
 
   MainWindow w;
   a.setQuitOnLastWindowClosed(false);
